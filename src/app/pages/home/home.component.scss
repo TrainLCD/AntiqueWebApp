@@ -1,0 +1,109 @@
+.container {
+  display: block;
+}
+
+@media only screen and (orientation: portrait) {
+  .container {
+    height: 100vw;
+    -webkit-transform: rotate(90deg);
+    -moz-transform: rotate(90deg);
+    -o-transform: rotate(90deg);
+    -ms-transform: rotate(90deg);
+    transform: rotate(90deg);
+  }
+}
+
+@media only screen and (orientation: landscape) {
+  .container {
+    -webkit-transform: rotate(0deg);
+    -moz-transform: rotate(0deg);
+    -o-transform: rotate(0deg);
+    -ms-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+}
+
+.header {
+  background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+  overflow: hidden;
+  height: 120px;
+  .headerBottom {
+    display: flex;
+    align-items: flex-end;
+    height: 72px;
+    .headerUnit {
+      margin-left: 10%;
+      font-weight: bold;
+      font-size: 1.75rem;
+    }
+    .headerStationName {
+      flex: 1;
+      text-align: center;
+      margin-right: 10%;
+      font-weight: bold;
+    }
+  }
+  .headerTop {
+    padding: 14px 0 0 21px;
+    .headerBoundStationName {
+      font-weight: bold;
+      color: #555;
+      font-size: 1.25rem;
+    }
+  }
+}
+
+.bottom {
+  .stations {
+    display: flex;
+    justify-content: space-around;
+    align-items: flex-end;
+    padding: 18px 0;
+    width: 95%;
+    &:after {
+      background: var(--line-color);
+      width: 22.25px;
+      height: 22.25px;
+      position: absolute;
+      content: '';
+      right: -11.125px;
+      bottom: -27.5px;
+      z-index: -1;
+      transform: rotate(45deg);
+    }
+    position: relative;
+    .stationsStationName {
+      -ms-writing-mode: tb-lr;
+      writing-mode: vertical-lr;
+      vertical-align: middle;
+      font-weight: bold;
+      font-size: 1.5rem;
+      height: 40%;
+      text-align: right;
+    }
+
+    .lineDot {
+      position: absolute;
+      width: 32px;
+      height: 24px;
+      background-image: linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%);
+      bottom: -28px;
+    }
+    .lineDotCurrent {
+      background: #aaa;
+    }
+  }
+}
+
+.normalButton {
+  display: block;
+  margin: 21px auto;
+  color: #fff;
+  background: #333;
+  border-radius: 4px;
+  font-size: 1rem;
+  padding: 8px 12px;
+  border: none;
+  appearance: none;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+}

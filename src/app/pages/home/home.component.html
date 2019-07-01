@@ -1,0 +1,99 @@
+<div class="container">
+  <ng-container *ngIf="station | async as s; else loading">
+    <ng-container *ngIf="selectedLineId; else lineNotSelected">
+      <div class="content" *ngIf="boundStation; else boundNotSelected">
+        <header class="header" [ngStyle]="headerStyle">
+          <div class="headerTop">
+            <p class="headerBoundStationName">{{ boundStation.name }} ゆき</p>
+          </div>
+          <div
+            class="headerBottom"
+            [@content]
+            *ngIf="headerContent === 'CURRENT_STATION'"
+          >
+            <p class="headerUnit">ただいま</p>
+            <p
+              class="headerStationName"
+              [@content]
+              [ngStyle]="getHeaderStationNameStyle(s.name)"
+            >
+              {{ s.name }}
+            </p>
+          </div>
+          <div
+            class="headerBottom"
+            [@content]="headerContent === 'NEXT_STOP' ? 'open' : 'closed'"
+            *ngIf="headerContent === 'NEXT_STOP' && formedStations[1]"
+          >
+            <p class="headerUnit">つぎは</p>
+            <p
+              class="headerStationName"
+              [ngStyle]="getHeaderStationNameStyle(formedStations[1].name)"
+            >
+              {{ formedStations[1].name }}
+            </p>
+          </div>
+        </header>
+        <main class="bottom">
+          <ul
+            class="stations"
+            [ngStyle]="stationWrapperStyle"
+            *ngIf="formedStations.length"
+          >
+            <li class="stationWrapper" *ngFor="let s of formedStations">
+              <p class="stationsStationName">
+                {{ s.name }}
+              </p>
+              <div
+                [class]="
+                  s.name !== station.getValue().name
+                    ? 'lineDot'
+                    : 'lineDot lineDotCurrent'
+                "
+              ></div>
+            </li>
+          </ul>
+        </main>
+      </div>
+    </ng-container>
+  </ng-container>
+</div>
+
+<ng-template #loading>
+  <div class="loading">
+    Loading...
+  </div>
+</ng-template>
+
+<ng-template #lineNotSelected>
+  <h1>路線を選択してください</h1>
+  <ng-container *ngFor="let line of station.getValue().lines">
+    <button
+      class="normalButton"
+      (click)="handleLineButtonClick(line.id)"
+      [ngStyle]="lineButtonStyle(line.lineColorC)"
+    >
+      {{ line.name }}
+    </button>
+  </ng-container>
+</ng-template>
+
+<ng-template #boundNotSelected>
+  <ng-container *ngIf="fetchedStations | async; else loading">
+    <h1>方面を選択してください</h1>
+    <button
+      class="normalButton"
+      *ngIf="inboundStation"
+      (click)="handleBoundClick('INBOUND', inboundStation)"
+    >
+      {{ inboundStation.name }}方面
+    </button>
+    <button
+      class="normalButton"
+      *ngIf="outboundStation"
+      (click)="handleBoundClick('OUTBOUND', outboundStation)"
+    >
+      {{ outboundStation.name }}方面
+    </button>
+  </ng-container>
+</ng-template>
