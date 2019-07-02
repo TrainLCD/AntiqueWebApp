@@ -81,19 +81,21 @@
 <ng-template #boundNotSelected>
   <ng-container *ngIf="fetchedStations | async; else loading">
     <h1>方面を選択してください</h1>
-    <button
-      class="normalButton"
-      *ngIf="inboundStation"
-      (click)="handleBoundClick('INBOUND', inboundStation)"
-    >
-      {{ inboundStation.name }}方面
-    </button>
-    <button
-      class="normalButton"
-      *ngIf="outboundStation"
-      (click)="handleBoundClick('OUTBOUND', outboundStation)"
-    >
-      {{ outboundStation.name }}方面
-    </button>
+    <ng-container *ngIf="inboundStation && outboundStation; else loading">
+      <button
+        class="normalButton"
+        *ngIf="inboundStation"
+        (click)="handleBoundClick('INBOUND', inboundStation)"
+      >
+        {{ inboundStation.name }}方面
+      </button>
+      <button
+        class="normalButton"
+        *ngIf="outboundStation"
+        (click)="handleBoundClick('OUTBOUND', outboundStation)"
+      >
+        {{ outboundStation.name }}方面
+      </button>
+    </ng-container>
   </ng-container>
 </ng-template>

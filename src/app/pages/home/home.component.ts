@@ -1,6 +1,6 @@
 import { BehaviorSubject, Subscription } from 'rxjs';
 
-import { animate, state, style, transition, trigger } from '@angular/animations';
+import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
@@ -20,14 +20,14 @@ const CONTENT_TRANSITION_INTERVAL = 5000;
   animations: [
     trigger('content', [
       transition(':enter', [
-        style({opacity: 0}),
-        animate('1000ms', style({opacity: 1}))
+        style({ opacity: 0 }),
+        animate('1000ms', style({ opacity: 1 }))
       ]),
       transition(':leave', [
-        style({ opacity: 1}),
-        animate('1000ms', style({opacity: 0}))
+        style({ opacity: 1 }),
+        animate('1000ms', style({ opacity: 0 }))
       ])
-  ]),
+    ])
   ]
 })
 export class HomeComponent implements OnInit, OnDestroy {
@@ -55,7 +55,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   @HostBinding('attr.style')
   public get valueAsStyle(): any {
-    return this.sanitizer.bypassSecurityTrustStyle(`--line-color: ${this.selectedLineColor}`);
+    return this.sanitizer.bypassSecurityTrustStyle(
+      `--line-color: ${this.selectedLineColor}`
+    );
   }
 
   private init() {
@@ -66,7 +68,13 @@ export class HomeComponent implements OnInit, OnDestroy {
         const fetchStationSub = this.stationApiService
           .fetchNearestStation(latitude, longitude)
           .subscribe(station => {
-            this.station.next(station);
+            // 路線が選択されているときは違う駅の情報は無視する
+            if (
+              !this.selectedLineId ||
+              station.lines.filter(l => l.id === this.selectedLineId).length
+            ) {
+              this.station.next(station);
+            }
           });
         this.subscriptions.push(fetchStationSub);
       });
@@ -75,7 +83,7 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   public lineButtonStyle(lineColor: string) {
     return {
-      background: `#${lineColor}`
+      background: `#${lineColor ? lineColor : '#333'}`
     };
   }
 
@@ -99,8 +107,8 @@ export class HomeComponent implements OnInit, OnDestroy {
           }
           break;
         case 'NEXT_STOP':
-            this.headerContent = 'CURRENT_STATION';
-            break;
+          this.headerContent = 'CURRENT_STATION';
+          break;
       }
     }, CONTENT_TRANSITION_INTERVAL);
   }
@@ -135,8 +143,14 @@ export class HomeComponent implements OnInit, OnDestroy {
       s => s.groupId === currentStation.groupId
     );
     if (this.boundDirection === 'OUTBOUND') {
+      if (currentStationIndex === stations.length) {
+        return stations.slice(currentStationIndex > 7 ? 7 : 0, 7).reverse();
+      }
       return stations
-        .slice(currentStationIndex - currentStationIndex > 7 ? 7 : currentStationIndex - currentStationIndex, currentStationIndex + 1)
+        .slice(
+          currentStationIndex - 7 > 0 ? currentStationIndex - 7 : 0,
+          currentStationIndex + 1
+        )
         .reverse();
     }
     return stations.slice(currentStationIndex, currentStationIndex + 8);
@@ -146,9 +160,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (!this.station.getValue() || !this.selectedLineId) {
       return null;
     }
-    return `#${this.station
-    .getValue()
-    .lines.filter(line => line.id === this.selectedLineId)[0].lineColorC}`;
+    const line = this.station
+      .getValue()
+      .lines.filter(l => l.id === this.selectedLineId)[0];
+    const lineColor = line ? line.lineColorC : null;
+    return `#${lineColor ? lineColor : '#333'}`;
   }
 
   public get stationWrapperStyle() {
