@@ -73,6 +73,7 @@ export class HomeComponent implements OnInit, OnDestroy {
               !this.selectedLineId ||
               station.lines.filter(l => l.id === this.selectedLineId).length
             ) {
+              console.log(station);
               this.station.next(station);
             }
           });
@@ -140,8 +141,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     return stations[0];
   }
 
-  public get isYamanoteLine() {
-    return this.selectedLineId.toString() === '11302';
+  public get isLoopLine() {
+    // 11302: 山手線, 11623: 大阪環状線
+    const selectedLineIdStr = this.selectedLineId.toString();
+    return selectedLineIdStr === '11302' || selectedLineIdStr === '11623';
   }
 
   private formedStationsForRingOperation(
@@ -149,7 +152,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     currentStationIndex: number
   ) {
     if (this.boundDirection === 'INBOUND') {
-      if (currentStationIndex === 0 && this.isYamanoteLine) {
+      if (currentStationIndex === 0 && this.isLoopLine) {
         // 山手線は折り返す
         return [
           stations[currentStationIndex],
@@ -167,7 +170,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         .reverse();
     }
 
-    if (currentStationIndex === stations.length - 1 && this.isYamanoteLine) {
+    if (currentStationIndex === stations.length - 1 && this.isLoopLine) {
       // 山手線は折り返す
       return [stations[currentStationIndex], ...stations.slice(0, 6)];
     }
@@ -182,7 +185,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       s => s.groupId === currentStation.groupId
     );
 
-    if (this.isYamanoteLine) {
+    if (this.isLoopLine) {
       return this.formedStationsForRingOperation(stations, currentStationIndex);
     }
 

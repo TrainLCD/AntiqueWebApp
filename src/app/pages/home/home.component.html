@@ -4,7 +4,7 @@
       <div class="content" *ngIf="boundStation; else boundNotSelected">
         <header class="header" [ngStyle]="headerStyle">
           <div class="headerTop">
-            <p class="headerBoundStationName">{{ isYamanoteLine ? currentLine.name + ' ' + ringBoundDirection : boundStation.name + ' ゆき' }}</p>
+            <p class="headerBoundStationName">{{ isLoopLine ? currentLine.name + ' ' + ringBoundDirection : boundStation.name + ' ゆき' }}</p>
           </div>
           <div
             class="headerBottom"
@@ -87,14 +87,14 @@
         *ngIf="inboundStation"
         (click)="handleBoundClick('INBOUND', inboundStation)"
       >
-        {{ isYamanoteLine ? '内回り(' + inboundStation.name + '方面)' : inboundStation.name + '方面' }}
+        {{ isLoopLine ? '内回り(' + inboundStation.name + '方面)' : inboundStation.name + '方面' }}
       </button>
       <button
         class="normalButton"
         *ngIf="outboundStation"
         (click)="handleBoundClick('OUTBOUND', outboundStation)"
       >
-      {{ isYamanoteLine ? '外回り(' + outboundStation.name + '方面)' : outboundStation.name + '方面' }}
+      {{ isLoopLine ? '外回り(' + outboundStation.name + '方面)' : outboundStation.name + '方面' }}
     </button>
     </ng-container>
   </ng-container>
