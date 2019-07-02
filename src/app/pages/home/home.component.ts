@@ -136,7 +136,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     );
     if (this.boundDirection === 'OUTBOUND') {
       return stations
-        .slice(currentStationIndex - 7, currentStationIndex + 1)
+        .slice(currentStationIndex - currentStationIndex > 7 ? 7 : currentStationIndex - currentStationIndex, currentStationIndex + 1)
         .reverse();
     }
     return stations.slice(currentStationIndex, currentStationIndex + 8);
