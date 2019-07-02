@@ -2,14 +2,30 @@
   display: block;
 }
 
+.orientationWarning {
+  display: none;
+}
+
 @media only screen and (orientation: portrait) {
   .container {
-    height: 100vw;
-    -webkit-transform: rotate(90deg);
-    -moz-transform: rotate(90deg);
-    -o-transform: rotate(90deg);
-    -ms-transform: rotate(90deg);
-    transform: rotate(90deg);
+    display: none;
+  }
+
+
+  .orientationWarning {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    height: 100vh;
+    font-weight: bold;
+    background: #008ffe;
+    color: #fff;
+    .orientationWarningText {
+      text-align: center;
+      font-size: 1.25rem;
+      filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.16));
+    }
   }
 }
 
@@ -20,6 +36,10 @@
     -o-transform: rotate(0deg);
     -ms-transform: rotate(0deg);
     transform: rotate(0deg);
+  }
+
+  .orientationWarning {
+    display: none;
   }
 }
 
