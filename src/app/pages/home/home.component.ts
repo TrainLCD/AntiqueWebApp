@@ -37,7 +37,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public fetchedStations = new BehaviorSubject<Station[]>([]);
   public boundStation: Station;
   private boundDirection: TrainDirection;
-  public headerContent: HeaderContent = 'NEXT_STOP';
+  public headerContent: HeaderContent = 'CURRENT_STATION';
 
   constructor(
     private geolocationService: GeolocationService,
@@ -81,6 +81,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.subscriptions.push(watchPositionSub);
   }
 
+  public get ringBoundDirection() {
+    return this.boundDirection === 'INBOUND' ? '内回り' : '外回り';
+  }
+
   public lineButtonStyle(lineColor: string) {
     return {
       background: `#${lineColor ? lineColor : '#333'}`
@@ -102,7 +106,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     setInterval(() => {
       switch (this.headerContent) {
         case 'CURRENT_STATION':
-          if (this.formedStations.length) {
+          if (this.formedStations.length > 1) {
             this.headerContent = 'NEXT_STOP';
           }
           break;
@@ -136,12 +140,52 @@ export class HomeComponent implements OnInit, OnDestroy {
     return stations[0];
   }
 
+  public get isYamanoteLine() {
+    return this.selectedLineId.toString() === '11302';
+  }
+
+  private formedStationsForRingOperation(
+    stations: Station[],
+    currentStationIndex: number
+  ) {
+    if (this.boundDirection === 'INBOUND') {
+      if (currentStationIndex === 0 && this.isYamanoteLine) {
+        // 山手線は折り返す
+        return [
+          stations[currentStationIndex],
+          ...stations
+            .slice()
+            .reverse()
+            .slice(0, 6)
+        ];
+      }
+      return stations
+        .slice(
+          currentStationIndex - 7 > 0 ? currentStationIndex - 7 : 0,
+          currentStationIndex + 1
+        )
+        .reverse();
+    }
+
+    if (currentStationIndex === stations.length - 1 && this.isYamanoteLine) {
+      // 山手線は折り返す
+      return [stations[currentStationIndex], ...stations.slice(0, 6)];
+    }
+
+    return stations.slice(currentStationIndex, currentStationIndex + 8);
+  }
+
   public get formedStations() {
     const stations = this.fetchedStations.getValue();
     const currentStation = this.station.getValue();
     const currentStationIndex = stations.findIndex(
       s => s.groupId === currentStation.groupId
     );
+
+    if (this.isYamanoteLine) {
+      return this.formedStationsForRingOperation(stations, currentStationIndex);
+    }
+
     if (this.boundDirection === 'OUTBOUND') {
       if (currentStationIndex === stations.length) {
         return stations.slice(currentStationIndex > 7 ? 7 : 0, 7).reverse();
@@ -156,15 +200,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     return stations.slice(currentStationIndex, currentStationIndex + 8);
   }
 
+  public get currentLine() {
+    return this.station
+      .getValue()
+      .lines.filter(l => l.id === this.selectedLineId)[0];
+  }
+
   private get selectedLineColor() {
     if (!this.station.getValue() || !this.selectedLineId) {
       return null;
     }
-    const line = this.station
-      .getValue()
-      .lines.filter(l => l.id === this.selectedLineId)[0];
-    const lineColor = line ? line.lineColorC : null;
-    return `#${lineColor ? lineColor : '#333'}`;
+    const lineColor = this.currentLine ? this.currentLine.lineColorC : null;
+    return `${lineColor ? `#${lineColor}` : '#333'}`;
   }
 
   public get stationWrapperStyle() {
