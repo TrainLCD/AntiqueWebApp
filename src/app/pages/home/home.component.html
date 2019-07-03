@@ -25,7 +25,7 @@
             [@content]="headerContent === 'NEXT_STOP' ? 'open' : 'closed'"
             *ngIf="headerContent === 'NEXT_STOP' && formedStations[1]"
           >
-            <p class="headerUnit">つぎは</p>
+            <p class="headerUnit">{{ nextText }}</p>
             <p
               class="headerStationName"
               [ngStyle]="getHeaderStationNameStyle(formedStations[1].name)"

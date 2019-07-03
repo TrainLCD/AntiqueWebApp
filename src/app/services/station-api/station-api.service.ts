@@ -22,6 +22,9 @@ export class StationApiService {
             groupId
             name
             address
+            distance
+            latitude
+            longitude
             lines {
               id
               lineColorC
@@ -49,6 +52,8 @@ export class StationApiService {
           station(id: ${groupId}) {
             name
             address
+            latitude
+            longitude
             lines {
               id
               lineColorC
@@ -77,6 +82,8 @@ export class StationApiService {
             groupId
             name
             address
+            latitude
+            longitude
             lines {
               id
               lineColorC

@@ -5,6 +5,7 @@ import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
 import { Station } from '../../models/StationAPI';
+import { DistanceService } from '../../services/distance/distance.service';
 import { GeolocationService } from '../../services/geolocation/geolocation.service';
 import { StationApiService } from '../../services/station-api/station-api.service';
 
@@ -12,6 +13,8 @@ type TrainDirection = 'INBOUND' | 'OUTBOUND';
 type HeaderContent = 'CURRENT_STATION' | 'NEXT_STOP';
 
 const CONTENT_TRANSITION_INTERVAL = 5000;
+const APPROACHING_THRESHOLD = 2000;
+const ARRIVED_THRESHOLD = 1000;
 
 @Component({
   selector: 'app-home',
@@ -31,6 +34,7 @@ const CONTENT_TRANSITION_INTERVAL = 5000;
   ]
 })
 export class HomeComponent implements OnInit, OnDestroy {
+  private currentCoordinates: Coordinates;
   private subscriptions: Subscription[] = [];
   public station = new BehaviorSubject<Station>(null);
   public selectedLineId: number;
@@ -42,6 +46,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   constructor(
     private geolocationService: GeolocationService,
     private stationApiService: StationApiService,
+    private distanceService: DistanceService,
     private sanitizer: DomSanitizer
   ) {}
 
@@ -64,16 +69,18 @@ export class HomeComponent implements OnInit, OnDestroy {
     const watchPositionSub = this.geolocationService
       .watchPosition()
       .subscribe(pos => {
+        this.currentCoordinates = pos.coords;
         const { latitude, longitude } = pos.coords;
         const fetchStationSub = this.stationApiService
           .fetchNearestStation(latitude, longitude)
           .subscribe(station => {
             // 路線が選択されているときは違う駅の情報は無視する
+            // 1kmより離れている場合無視する
             if (
               !this.selectedLineId ||
-              station.lines.filter(l => l.id === this.selectedLineId).length
+              (station.lines.filter(l => l.id === this.selectedLineId).length &&
+                station.distance <= ARRIVED_THRESHOLD)
             ) {
-              console.log(station);
               this.station.next(station);
             }
           });
@@ -147,15 +154,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     return selectedLineIdStr === '11302' || selectedLineIdStr === '11623';
   }
 
-  private formedStationsForRingOperation(
-    stations: Station[],
-    currentStationIndex: number
-  ) {
+  private formedStationsForRingOperation(stations: Station[]) {
     if (this.boundDirection === 'INBOUND') {
-      if (currentStationIndex === 0 && this.isLoopLine) {
+      if (this.currentStationIndex === 0 && this.isLoopLine) {
         // 山手線は折り返す
         return [
-          stations[currentStationIndex],
+          stations[this.currentStationIndex],
           ...stations
             .slice()
             .reverse()
@@ -164,43 +168,53 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
       return stations
         .slice(
-          currentStationIndex - 7 > 0 ? currentStationIndex - 7 : 0,
-          currentStationIndex + 1
+          this.currentStationIndex - 7 > 0 ? this.currentStationIndex - 7 : 0,
+          this.currentStationIndex + 1
         )
         .reverse();
     }
 
-    if (currentStationIndex === stations.length - 1 && this.isLoopLine) {
+    if (this.currentStationIndex === stations.length - 1 && this.isLoopLine) {
       // 山手線は折り返す
-      return [stations[currentStationIndex], ...stations.slice(0, 6)];
+      return [stations[this.currentStationIndex], ...stations.slice(0, 6)];
     }
 
-    return stations.slice(currentStationIndex, currentStationIndex + 8);
+    return stations.slice(
+      this.currentStationIndex,
+      this.currentStationIndex + 8
+    );
+  }
+
+  public get currentStationIndex() {
+    const stations = this.fetchedStations.getValue();
+    const currentStation = this.station.getValue();
+    return stations.findIndex(s => s.groupId === currentStation.groupId);
   }
 
   public get formedStations() {
     const stations = this.fetchedStations.getValue();
-    const currentStation = this.station.getValue();
-    const currentStationIndex = stations.findIndex(
-      s => s.groupId === currentStation.groupId
-    );
 
     if (this.isLoopLine) {
-      return this.formedStationsForRingOperation(stations, currentStationIndex);
+      return this.formedStationsForRingOperation(stations);
     }
 
     if (this.boundDirection === 'OUTBOUND') {
-      if (currentStationIndex === stations.length) {
-        return stations.slice(currentStationIndex > 7 ? 7 : 0, 7).reverse();
+      if (this.currentStationIndex === stations.length) {
+        return stations
+          .slice(this.currentStationIndex > 7 ? 7 : 0, 7)
+          .reverse();
       }
       return stations
         .slice(
-          currentStationIndex - 7 > 0 ? currentStationIndex - 7 : 0,
-          currentStationIndex + 1
+          this.currentStationIndex - 7 > 0 ? this.currentStationIndex - 7 : 0,
+          this.currentStationIndex + 1
         )
         .reverse();
     }
-    return stations.slice(currentStationIndex, currentStationIndex + 8);
+    return stations.slice(
+      this.currentStationIndex,
+      this.currentStationIndex + 8
+    );
   }
 
   public get currentLine() {
@@ -233,5 +247,26 @@ export class HomeComponent implements OnInit, OnDestroy {
     return {
       fontSize: '3.5rem'
     };
+  }
+
+  public get nextText() {
+    const nextStation = this.formedStations[1];
+    if (!nextStation) {
+      return null;
+    }
+    const nextStationCoordinates: Partial<Coordinates> = {
+      latitude: nextStation.latitude,
+      longitude: nextStation.longitude
+    };
+    const nextStationDistance = this.distanceService.calcHubenyDistance(
+      this.currentCoordinates,
+      nextStationCoordinates
+    );
+    // 2km以上次の駅から離れている: つぎは
+    // 2kmより近い: まもなく
+    if (nextStationDistance < APPROACHING_THRESHOLD) {
+      return 'まもなく';
+    }
+    return 'つぎは';
   }
 }

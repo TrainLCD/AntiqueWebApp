@@ -19,6 +19,9 @@ export interface Station {
   name: string;
   address: string;
   lines: Line[];
+  latitude: number;
+  longitude: number;
+  distance: number;
   __typename: string;
 }
 
