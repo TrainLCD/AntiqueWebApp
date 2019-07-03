@@ -13,8 +13,8 @@ type TrainDirection = 'INBOUND' | 'OUTBOUND';
 type HeaderContent = 'CURRENT_STATION' | 'NEXT_STOP';
 
 const CONTENT_TRANSITION_INTERVAL = 5000;
-const APPROACHING_THRESHOLD = 1500;
-const ARRIVED_THRESHOLD = 500;
+const APPROACHING_THRESHOLD = 500;
+const ARRIVED_THRESHOLD = 100;
 
 @Component({
   selector: 'app-home',
