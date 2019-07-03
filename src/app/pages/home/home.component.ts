@@ -75,7 +75,7 @@ export class HomeComponent implements OnInit, OnDestroy {
           .fetchNearestStation(latitude, longitude)
           .subscribe(station => {
             // 路線が選択されているときは違う駅の情報は無視する
-            // 1kmより離れている場合無視する
+            // ARRIVED_THRESHOLDより離れている場合無視する
             if (
               !this.selectedLineId ||
               (station.lines.filter(l => l.id === this.selectedLineId).length &&
@@ -262,8 +262,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       this.currentCoordinates,
       nextStationCoordinates
     );
-    // 2km以上次の駅から離れている: つぎは
-    // 2kmより近い: まもなく
+    // APPROACHING_THRESHOLD以上次の駅から離れている: つぎは
+    // APPROACHING_THRESHOLDより近い: まもなく
     if (nextStationDistance < APPROACHING_THRESHOLD) {
       return 'まもなく';
     }
