@@ -10,7 +10,8 @@ export class AppComponent implements OnInit {
   constructor(private updates: SwUpdate) {}
 
   ngOnInit() {
-    this.updates.available.subscribe(() => {
+    this.updates.available.subscribe(event => {
+      console.log(event);
       const prompt = window.confirm(
         'アップデートがあります。今すぐ更新しますか？'
       );
