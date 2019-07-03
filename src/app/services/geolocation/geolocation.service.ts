@@ -10,20 +10,12 @@ export class GeolocationService {
 
   constructor() {}
 
-  public getCurrentPosition(): Observable<Position> {
-    return new Observable<Position>(observer => {
-      navigator.geolocation.getCurrentPosition(
-        position => observer.next(position),
-        err => observer.error(err)
-      );
-    });
-  }
-
   public watchPosition(): Observable<Position> {
     return new Observable<Position>(observer => {
       this.watchId = navigator.geolocation.watchPosition(
         position => observer.next(position),
-        err => observer.error(err)
+        err => observer.error(err),
+        { enableHighAccuracy: true }
       );
     });
   }
