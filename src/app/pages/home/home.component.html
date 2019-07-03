@@ -4,7 +4,7 @@
       <div class="content" *ngIf="boundStation; else boundNotSelected">
         <header class="header" [ngStyle]="headerStyle">
           <div class="headerTop">
-            <p class="headerBoundStationName">{{ isLoopLine ? currentLine.name + ' ' + ringBoundDirection : boundStation.name + ' ゆき' }}</p>
+            <p class="headerBoundStationName">{{ isLoopLine ? currentLine.name + ' ' + ringBoundDirection : boundStation.name + ' 方面' }}</p>
           </div>
           <div
             class="headerBottom"
@@ -37,11 +37,10 @@
         <main class="bottom">
           <ul
             class="stations"
-            [ngStyle]="stationWrapperStyle"
             *ngIf="formedStations.length"
           >
             <li class="stationWrapper" *ngFor="let s of formedStations">
-              <p class="stationsStationName">
+              <p class="stationsStationName" [ngStyle]="getStationsStationNameStyle(s.name)">
                 {{ s.name }}
               </p>
               <div

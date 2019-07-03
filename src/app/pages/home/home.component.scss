@@ -80,8 +80,11 @@
     align-items: flex-end;
     padding: 18px 0;
     width: 95%;
+    border-bottom: 32px solid;
+    border-image: var(--line-color-gradient);
+    border-image-slice: 30;
     &:after {
-      background: var(--line-color);
+      background: var(--line-color-gradient-dot);
       width: 22.25px;
       height: 22.25px;
       position: absolute;
@@ -97,7 +100,6 @@
       writing-mode: vertical-lr;
       vertical-align: middle;
       font-weight: bold;
-      font-size: 1.5rem;
       height: 40%;
       text-align: right;
     }

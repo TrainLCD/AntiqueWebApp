@@ -15,6 +15,7 @@ type HeaderContent = 'CURRENT_STATION' | 'NEXT_STOP';
 const CONTENT_TRANSITION_INTERVAL = 5000;
 const APPROACHING_THRESHOLD = 500;
 const ARRIVED_THRESHOLD = 100;
+const STOPPED_SPEED_KMH = 30;
 
 @Component({
   selector: 'app-home',
@@ -42,6 +43,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public boundStation: Station;
   private boundDirection: TrainDirection;
   public headerContent: HeaderContent = 'CURRENT_STATION';
+  private currentSpeed: number | null = null;
 
   constructor(
     private geolocationService: GeolocationService,
@@ -59,10 +61,24 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   @HostBinding('attr.style')
-  public get valueAsStyle(): any {
+  public get lineColorAsStyle(): any {
     return this.sanitizer.bypassSecurityTrustStyle(
-      `--line-color: ${this.selectedLineColor}`
+      `--line-color-gradient: ${
+        this.lineColorGradientVar
+      }; --line-color-gradient-dot: ${this.lineColorGradientDotVar}`
     );
+  }
+
+  public get lineColorGradientVar(): string {
+    return `linear-gradient(to bottom, ${
+      this.selectedLineColor
+    }, rgb(255, 255, 255), ${this.selectedLineColor})`;
+  }
+
+  public get lineColorGradientDotVar(): string {
+    return `linear-gradient(to right bottom, ${
+      this.selectedLineColor
+    }bb, ${this.selectedLineColor}d2, ${this.selectedLineColor}ff)`;
   }
 
   private init() {
@@ -70,16 +86,19 @@ export class HomeComponent implements OnInit, OnDestroy {
       .watchPosition()
       .subscribe(pos => {
         this.currentCoordinates = pos.coords;
-        const { latitude, longitude } = pos.coords;
+        const { latitude, longitude, speed } = pos.coords;
+        this.currentSpeed = speed ? Math.round((speed * 3600) / 1000) : null;
         const fetchStationSub = this.stationApiService
           .fetchNearestStation(latitude, longitude)
           .subscribe(station => {
             // 路線が選択されているときは違う駅の情報は無視する
             // ARRIVED_THRESHOLDより離れている場合無視する
+            // 速度が10km/h以上の場合無視する 速度がnullの場合は通す
             if (
               !this.selectedLineId ||
               (station.lines.filter(l => l.id === this.selectedLineId).length &&
                 station.distance <= ARRIVED_THRESHOLD)
+              && (!this.currentSpeed || this.currentSpeed < STOPPED_SPEED_KMH)
             ) {
               this.station.next(station);
             }
@@ -231,13 +250,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     return `${lineColor ? `#${lineColor}` : '#333'}`;
   }
 
-  public get stationWrapperStyle() {
-    return {
-      borderBottom: `32px solid ${this.selectedLineColor}`,
-      '--line-color': this.selectedLineColor
-    };
-  }
-
   public getHeaderStationNameStyle(stationName: string) {
     if (stationName.length > 5) {
       return {
@@ -268,5 +280,11 @@ export class HomeComponent implements OnInit, OnDestroy {
       return 'まもなく';
     }
     return 'つぎは';
+  }
+
+  public getStationsStationNameStyle(stationName: string) {
+    return {
+      fontSize: stationName.length > 5 ? '1.25rem' : '1.5rem'
+    };
   }
 }
