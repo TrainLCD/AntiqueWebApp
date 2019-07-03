@@ -15,7 +15,6 @@ type HeaderContent = 'CURRENT_STATION' | 'NEXT_STOP';
 const CONTENT_TRANSITION_INTERVAL = 5000;
 const APPROACHING_THRESHOLD = 500;
 const ARRIVED_THRESHOLD = 100;
-const STOPPED_SPEED_KMH = 30;
 
 @Component({
   selector: 'app-home',
@@ -43,7 +42,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   public boundStation: Station;
   private boundDirection: TrainDirection;
   public headerContent: HeaderContent = 'CURRENT_STATION';
-  private currentSpeed: number | null = null;
 
   constructor(
     private geolocationService: GeolocationService,
@@ -86,8 +84,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       .watchPosition()
       .subscribe(pos => {
         this.currentCoordinates = pos.coords;
-        const { latitude, longitude, speed } = pos.coords;
-        this.currentSpeed = speed ? Math.round((speed * 3600) / 1000) : null;
+        const { latitude, longitude } = pos.coords;
         const fetchStationSub = this.stationApiService
           .fetchNearestStation(latitude, longitude)
           .subscribe(station => {
@@ -98,7 +95,6 @@ export class HomeComponent implements OnInit, OnDestroy {
               !this.selectedLineId ||
               (station.lines.filter(l => l.id === this.selectedLineId).length &&
                 station.distance <= ARRIVED_THRESHOLD)
-              && (!this.currentSpeed || this.currentSpeed < STOPPED_SPEED_KMH)
             ) {
               this.station.next(station);
             }
