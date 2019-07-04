@@ -12,10 +12,10 @@ import { StationApiService } from '../../services/station-api/station-api.servic
 type TrainDirection = 'INBOUND' | 'OUTBOUND';
 type HeaderContent = 'CURRENT_STATION' | 'NEXT_STOP';
 
-const CONTENT_TRANSITION_INTERVAL = 5000;
-const APPROACHING_THRESHOLD = 500;
-const ARRIVED_THRESHOLD = 50;
-const BAD_ACCURACY_THRESHOLD = 1000;
+const CONTENT_TRANSITION_INTERVAL = 5000; // ms
+const APPROACHING_THRESHOLD = 500; // m
+const ARRIVED_THRESHOLD = 0.25; // km
+const BAD_ACCURACY_THRESHOLD = 1000; // m
 
 @Component({
   selector: 'app-home',
@@ -97,7 +97,7 @@ export class HomeComponent implements OnInit, OnDestroy {
               (station.lines.filter(
                 l => parseInt(l.id, 10) === this.selectedLineId
               ).length &&
-                station.distance <= ARRIVED_THRESHOLD);
+                station.distance < ARRIVED_THRESHOLD);
             if (!!conditions) {
               this.station.next(station);
             }
