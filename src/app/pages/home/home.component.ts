@@ -13,8 +13,8 @@ type TrainDirection = 'INBOUND' | 'OUTBOUND';
 type HeaderContent = 'CURRENT_STATION' | 'NEXT_STOP';
 
 const CONTENT_TRANSITION_INTERVAL = 5000; // ms
-const APPROACHING_THRESHOLD = 500; // m
-const ARRIVED_THRESHOLD = 0.25; // km
+const APPROACHING_THRESHOLD = 750; // m
+const ARRIVED_THRESHOLD = 0.5; // km
 const BAD_ACCURACY_THRESHOLD = 1000; // m
 
 @Component({
