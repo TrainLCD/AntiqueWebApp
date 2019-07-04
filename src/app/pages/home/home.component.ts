@@ -90,7 +90,6 @@ export class HomeComponent implements OnInit, OnDestroy {
           .subscribe(station => {
             // 路線が選択されているときは違う駅の情報は無視する
             // ARRIVED_THRESHOLDより離れている場合無視する
-            // 速度が10km/h以上の場合無視する 速度がnullの場合は通す
             if (
               !this.selectedLineId ||
               (station.lines.filter(l => l.id === this.selectedLineId).length &&
