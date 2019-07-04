@@ -26,7 +26,7 @@ export interface Station {
 }
 
 export interface Line {
-  id: number;
+  id: string;
   lineColorC: null;
   name: string;
   __typename: string;

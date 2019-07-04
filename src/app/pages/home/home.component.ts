@@ -74,9 +74,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public get lineColorGradientDotVar(): string {
-    return `linear-gradient(to right bottom, ${
+    return `linear-gradient(to right bottom, ${this.selectedLineColor}bb, ${
       this.selectedLineColor
-    }bb, ${this.selectedLineColor}d2, ${this.selectedLineColor}ff)`;
+    }d2, ${this.selectedLineColor}ff)`;
   }
 
   private init() {
@@ -90,11 +90,13 @@ export class HomeComponent implements OnInit, OnDestroy {
           .subscribe(station => {
             // 路線が選択されているときは違う駅の情報は無視する
             // ARRIVED_THRESHOLDより離れている場合無視する
-            if (
+            const conditions =
               !this.selectedLineId ||
-              (station.lines.filter(l => l.id === this.selectedLineId).length &&
-                station.distance <= ARRIVED_THRESHOLD)
-            ) {
+              (station.lines.filter(
+                l => parseInt(l.id, 10) === this.selectedLineId
+              ).length &&
+                station.distance <= ARRIVED_THRESHOLD);
+            if (!!conditions) {
               this.station.next(station);
             }
           });
@@ -113,11 +115,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     };
   }
 
-  public handleLineButtonClick(lineId: number) {
-    this.selectedLineId = lineId;
+  public handleLineButtonClick(lineId: string) {
+    const intLineId = parseInt(lineId, 10);
+    this.selectedLineId = intLineId;
 
     const fetchByLineIdSub = this.stationApiService
-      .fetchStationsByLineId(lineId)
+      .fetchStationsByLineId(intLineId)
       .subscribe(stations => {
         this.fetchedStations.next(stations);
       });
@@ -234,7 +237,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public get currentLine() {
     return this.station
       .getValue()
-      .lines.filter(l => l.id === this.selectedLineId)[0];
+      .lines.filter(l => parseInt(l.id, 10) === this.selectedLineId)[0];
   }
 
   private get selectedLineColor() {
