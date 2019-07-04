@@ -14,7 +14,7 @@ type HeaderContent = 'CURRENT_STATION' | 'NEXT_STOP';
 
 const CONTENT_TRANSITION_INTERVAL = 5000;
 const APPROACHING_THRESHOLD = 500;
-const ARRIVED_THRESHOLD = 100;
+const ARRIVED_THRESHOLD = 50;
 
 @Component({
   selector: 'app-home',
