@@ -129,3 +129,22 @@
   appearance: none;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
 }
+
+.badAccuracy {
+  max-width: 30%;
+  background: rgba($color: #ff1744, $alpha: 0.75);
+  box-shadow: 0 3px 6px rgba($color: #ff1744, $alpha: 0.16);
+  color: #fff;
+  position: absolute;
+  right: 24px;
+  bottom: 24px;
+  padding: 24px;
+  line-height: 1.25;
+  font-weight: bold;
+  user-select: none;
+  .dismissNotice {
+    font-size: 0.9rem;
+    font-weight: normal;
+    margin-top: 4px;
+  }
+}

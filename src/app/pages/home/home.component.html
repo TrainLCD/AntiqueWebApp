@@ -58,6 +58,11 @@
   </ng-container>
 </div>
 
+<div class="badAccuracy" (click)="dismissBadAccuracy()" *ngIf="badAccuracy">
+  <b>GPSの誤差が1km以上あるため、正常に動作しない可能性があります。</b>
+  <p class="dismissNotice">タップで消せます</p>
+</div>
+
 <ng-template #loading>
   <div class="loading">
     Loading...

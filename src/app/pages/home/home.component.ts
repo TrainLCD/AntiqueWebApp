@@ -15,6 +15,7 @@ type HeaderContent = 'CURRENT_STATION' | 'NEXT_STOP';
 const CONTENT_TRANSITION_INTERVAL = 5000;
 const APPROACHING_THRESHOLD = 500;
 const ARRIVED_THRESHOLD = 50;
+const BAD_ACCURACY_THRESHOLD = 1000;
 
 @Component({
   selector: 'app-home',
@@ -42,6 +43,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public boundStation: Station;
   private boundDirection: TrainDirection;
   public headerContent: HeaderContent = 'CURRENT_STATION';
+  private badAccuracyDismissed = false;
 
   constructor(
     private geolocationService: GeolocationService,
@@ -284,5 +286,20 @@ export class HomeComponent implements OnInit, OnDestroy {
     return {
       fontSize: stationName.length > 5 ? '1.25rem' : '1.5rem'
     };
+  }
+
+  public get badAccuracy(): boolean {
+    if (!this.currentCoordinates) {
+      return false;
+    }
+    if (this.badAccuracyDismissed) {
+      return false;
+    }
+    const { accuracy } = this.currentCoordinates;
+    return accuracy ? accuracy > BAD_ACCURACY_THRESHOLD : false;
+  }
+
+  public dismissBadAccuracy() {
+    this.badAccuracyDismissed = true;
   }
 }

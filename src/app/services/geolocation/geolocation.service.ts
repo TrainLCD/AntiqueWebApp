@@ -10,12 +10,12 @@ export class GeolocationService {
 
   constructor() {}
 
-  public watchPosition(): Observable<Position> {
+  public watchPosition(timeout = 10000): Observable<Position> {
     return new Observable<Position>(observer => {
       this.watchId = navigator.geolocation.watchPosition(
         position => observer.next(position),
         err => observer.error(err),
-        { enableHighAccuracy: true }
+        { enableHighAccuracy: true, timeout, maximumAge: 0 }
       );
     });
   }
