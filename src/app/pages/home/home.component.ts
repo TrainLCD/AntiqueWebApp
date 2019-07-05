@@ -159,11 +159,16 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
         break;
       case 'NEXT_STOP':
+        /*
         if (this.hiraganaStationNames[this.formedStations[1].groupId]) {
           this.headerContent = 'NEXT_STOP_KANA';
         } else {
           this.headerContent = 'CURRENT_STATION';
         }
+        */
+        if (this.isArrived) {
+          this.headerContent = 'CURRENT_STATION';
+          }
         break;
       case 'NEXT_STOP_KANA':
         if (this.isArrived) {
@@ -316,7 +321,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (!currentStation) {
       return null;
     }
-    return currentStation.distance > ARRIVED_THRESHOLD;
+    return currentStation.distance < ARRIVED_THRESHOLD;
   }
 
   public get nextText() {
