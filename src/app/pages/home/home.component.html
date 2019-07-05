@@ -4,7 +4,13 @@
       <div class="content" *ngIf="boundStation; else boundNotSelected">
         <header class="header" [ngStyle]="headerStyle">
           <div class="headerTop">
-            <p class="headerBoundStationName">{{ isLoopLine ? currentLine.name + ' ' + ringBoundDirection : boundStation.name + ' 方面' }}</p>
+            <p class="headerBoundStationName">
+              {{
+                isLoopLine
+                  ? currentLine.name + ' ' + ringBoundDirection
+                  : boundStation.name + ' 方面'
+              }}
+            </p>
           </div>
           <div
             class="headerBottom"
@@ -12,10 +18,7 @@
             *ngIf="headerContent === 'CURRENT_STATION'"
           >
             <p class="headerUnit">ただいま</p>
-            <p
-              class="headerStationName"
-              [@content]
-            >
+            <p class="headerStationName" [@content]>
               {{ s.name }}
             </p>
           </div>
@@ -25,9 +28,7 @@
             *ngIf="headerContent === 'NEXT_STOP' && formedStations[1]"
           >
             <p class="headerUnit">{{ nextText }}</p>
-            <p
-              class="headerStationName"
-            >
+            <p class="headerStationName">
               {{ formedStations[1].name }}
             </p>
           </div>
@@ -37,9 +38,7 @@
             *ngIf="headerContent === 'NEXT_STOP_KANA' && formedStations[1]"
           >
             <p class="headerUnit">{{ nextText }}</p>
-            <p
-              class="headerStationName headerStationNameKana"
-            >
+            <p class="headerStationName headerStationNameKana">
               {{ hiraganaStationNames[formedStations[1].groupId] }}
             </p>
           </div>
@@ -47,7 +46,7 @@
         <main class="bottom">
           <ul
             class="stations"
-            *ngIf="formedStations.length"
+            *ngIf="formedStations.length && bottomContent === 'LINE'"
           >
             <li class="stationWrapper" *ngFor="let s of formedStations">
               <p class="stationsStationName">
@@ -62,7 +61,25 @@
               ></div>
             </li>
           </ul>
-          <p class="caution">ひらがな表示はベータ版です。<br>地下鉄など、電波の入りづらい場所では正常に動作しない可能性があります。</p>
+
+          <div class="transfer" *ngIf="bottomContent === 'TRANSFER'">
+            <h2 class="transferTitle">のりかえ</h2>
+            <div class="transferList">
+              <div
+                *ngFor="let line of nextStationLinesWithoutCurrentLine"
+                class="transferItem"
+              >
+                <div
+                  class="transferLineDot"
+                  [ngStyle]="transferLineDotStyle(line.id)"
+                ></div>
+                <p class="transferLineName">{{ line.name }}</p>
+              </div>
+            </div>
+          </div>
+          <p class="caution">
+            地下鉄など、電波の入りづらい場所では正常に動作しない可能性があります。
+          </p>
         </main>
       </div>
     </ng-container>
@@ -102,15 +119,23 @@
         *ngIf="inboundStation"
         (click)="handleBoundClick('INBOUND', inboundStation)"
       >
-        {{ isLoopLine ? '内回り(' + inboundStation.name + '方面)' : inboundStation.name + '方面' }}
+        {{
+          isLoopLine
+            ? '内回り(' + inboundStation.name + '方面)'
+            : inboundStation.name + '方面'
+        }}
       </button>
       <button
         class="normalButton"
         *ngIf="outboundStation"
         (click)="handleBoundClick('OUTBOUND', outboundStation)"
       >
-      {{ isLoopLine ? '外回り(' + outboundStation.name + '方面)' : outboundStation.name + '方面' }}
-    </button>
+        {{
+          isLoopLine
+            ? '外回り(' + outboundStation.name + '方面)'
+            : outboundStation.name + '方面'
+        }}
+      </button>
     </ng-container>
   </ng-container>
 </ng-template>

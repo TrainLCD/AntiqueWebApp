@@ -22,12 +22,12 @@ export interface Station {
   latitude: number;
   longitude: number;
   distance: number;
-  __typename: string;
+  __typename: 'Station';
 }
 
 export interface Line {
   id: string;
-  lineColorC: null;
+  lineColorC: string | null;
   name: string;
-  __typename: string;
+  __typename: 'Line';
 }

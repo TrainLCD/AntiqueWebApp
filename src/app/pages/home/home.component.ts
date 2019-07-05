@@ -4,19 +4,22 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
-import { Station } from '../../models/StationAPI';
+import { Station, Line } from '../../models/StationAPI';
 import { DistanceService } from '../../services/distance/distance.service';
 import { GeolocationService } from '../../services/geolocation/geolocation.service';
 import { HiraganaService } from '../../services/hiragana/hiragana.service';
 import { StationApiService } from '../../services/station-api/station-api.service';
 
-const CONTENT_TRANSITION_INTERVAL = 5000; // ms
+const HEADER_CONTENT_TRANSITION_INTERVAL = 5000; // ms
+const BOTTOM_CONTENT_TRANSITION_INTERVAL = HEADER_CONTENT_TRANSITION_INTERVAL * 2; // ms
 const APPROACHING_THRESHOLD = 750; // m
 const ARRIVED_THRESHOLD = 0.25; // km
 const BAD_ACCURACY_THRESHOLD = 1000; // m
+const OMIT_JR_THRESHOLD = 3; // これ以上JR線があったら「JR線」で省略しよう
 
 type TrainDirection = 'INBOUND' | 'OUTBOUND';
 type HeaderContent = 'CURRENT_STATION' | 'NEXT_STOP' | 'NEXT_STOP_KANA';
+type BottomContent = 'LINE' | 'TRANSFER';
 
 @Component({
   selector: 'app-home',
@@ -44,6 +47,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public boundStation: Station;
   private boundDirection: TrainDirection;
   public headerContent: HeaderContent = this.initialHeaderContent;
+  public bottomContent: BottomContent = 'LINE';
   private badAccuracyDismissed = false;
   public hiraganaStationNames: { [key: string]: string } = {};
 
@@ -128,35 +132,56 @@ export class HomeComponent implements OnInit, OnDestroy {
       .fetchStationsByLineId(intLineId)
       .subscribe(stations => {
         this.fetchedStations.next(stations);
-        this.transformAllStationNameToHiragana(stations);
+        // ひらがな取得は一旦中止
+        // this.transformAllStationNameToHiragana(stations);
       });
     this.subscriptions.push(fetchByLineIdSub);
   }
 
+  private switchBottom() {
+    switch (this.bottomContent) {
+      case 'LINE':
+        if (this.nextStationLinesWithoutCurrentLine.length) {
+          this.bottomContent = 'TRANSFER';
+        }
+        break;
+      case 'TRANSFER':
+        this.bottomContent = 'LINE';
+        break;
+    }
+  }
+
+  private switchHeader() {
+    switch (this.headerContent) {
+      case 'CURRENT_STATION':
+        if (this.formedStations.length > 1) {
+          this.headerContent = 'NEXT_STOP';
+        }
+        break;
+      case 'NEXT_STOP':
+        if (this.hiraganaStationNames[this.formedStations[1].groupId]) {
+          this.headerContent = 'NEXT_STOP_KANA';
+        } else {
+          this.headerContent = 'CURRENT_STATION';
+        }
+        break;
+      case 'NEXT_STOP_KANA':
+        if (this.isArrived) {
+          this.headerContent = 'CURRENT_STATION';
+        } else {
+          this.headerContent = 'NEXT_STOP';
+        }
+        break;
+    }
+  }
+
   private startTimer() {
     setInterval(() => {
-      switch (this.headerContent) {
-        case 'CURRENT_STATION':
-          if (this.formedStations.length > 1) {
-            this.headerContent = 'NEXT_STOP';
-          }
-          break;
-        case 'NEXT_STOP':
-          if (this.hiraganaStationNames[this.formedStations[1].groupId]) {
-            this.headerContent = 'NEXT_STOP_KANA';
-          } else {
-            this.headerContent = 'CURRENT_STATION';
-          }
-          break;
-        case 'NEXT_STOP_KANA':
-          if (this.isArrived) {
-            this.headerContent = 'CURRENT_STATION';
-          } else {
-            this.headerContent = 'NEXT_STOP';
-          }
-          break;
-      }
-    }, CONTENT_TRANSITION_INTERVAL);
+      this.switchHeader();
+    }, HEADER_CONTENT_TRANSITION_INTERVAL);
+    setInterval(() => {
+      this.switchBottom();
+    }, BOTTOM_CONTENT_TRANSITION_INTERVAL);
   }
 
   public handleBoundClick(direction: TrainDirection, selectedStation: Station) {
@@ -316,6 +341,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     this.badAccuracyDismissed = true;
   }
 
+  /*
   private transformAllStationNameToHiragana(stations: Station[]) {
     stations.map(station => {
       this.hiraganaService.toHiragana(station.name).subscribe(hiragana => {
@@ -323,6 +349,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       });
     });
   }
+  */
 
   private get initialHeaderContent(): HeaderContent {
     if (this.isArrived) {
@@ -332,5 +359,31 @@ export class HomeComponent implements OnInit, OnDestroy {
       return 'CURRENT_STATION';
     }
     return 'NEXT_STOP';
+  }
+
+  public transferLineDotStyle(lineId: string) {
+    const line = this.nextStationLinesWithoutCurrentLine.filter(
+      l => parseInt(l.id, 10) === parseInt(lineId, 10))[0];
+    return {
+      background: `#${line.lineColorC ? line.lineColorC : '333333'}`
+    };
+  }
+
+  public get nextStationLinesWithoutCurrentLine(): Line[] {
+    const withoutCurrentLine = this.formedStations[1].lines.filter(
+      line => line.id !== this.currentLine.id
+    );
+    const jrLines = withoutCurrentLine.filter(line => line.name.startsWith('JR'));
+    if (jrLines.length > OMIT_JR_THRESHOLD) {
+      const withoutJR = withoutCurrentLine.filter(line => !line.name.startsWith('JR'));
+      withoutJR.unshift({
+        id: '0',
+        lineColorC: '008000', // 関西の人間に喧嘩を売る配色
+        name: 'JR線',
+        __typename: 'Line'
+      });
+      return withoutJR;
+    }
+    return withoutCurrentLine;
   }
 }

@@ -1,5 +1,7 @@
 .container {
   display: block;
+  height: 100vh;
+  overflow: hidden;
 }
 
 .orientationWarning {
@@ -120,6 +122,40 @@
       background: #aaa;
     }
   }
+
+  .transfer {
+    padding-top: 24px;
+    .transferTitle {
+      text-align: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #555;
+    }
+
+    .transferList {
+      width: 75%;
+      height: 100%;
+      margin: 0 auto;
+      padding-top: 24px;
+      display: flex;
+      flex-wrap: wrap;
+      .transferItem {
+        display: flex;
+        margin-bottom: 12px;
+        flex-basis: 50%;
+        .transferLineDot {
+          width: 24px;
+          height: 24px;
+          margin-right: 4px;
+        }
+        .transferLineName {
+          font-weight: bold;
+          color: #333;
+          font-size: 1.25rem;
+        }
+      }
+    }
+  }
 }
 
 .normalButton {
@@ -155,8 +191,9 @@
 }
 
 .caution {
-  margin-top: 12px;
-  margin-left: 12px;
+  position: absolute;;
+  left: 12px;
+  bottom: 12px;
   color: #aaa;
   font-size: 1vw;
 }
