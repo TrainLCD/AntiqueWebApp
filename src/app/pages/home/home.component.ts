@@ -4,7 +4,6 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
-import { environment } from '../../../environments/environment';
 import { Station } from '../../models/StationAPI';
 import { DistanceService } from '../../services/distance/distance.service';
 import { GeolocationService } from '../../services/geolocation/geolocation.service';
@@ -13,7 +12,7 @@ import { StationApiService } from '../../services/station-api/station-api.servic
 
 const CONTENT_TRANSITION_INTERVAL = 5000; // ms
 const APPROACHING_THRESHOLD = 750; // m
-const ARRIVED_THRESHOLD = 0.5; // km
+const ARRIVED_THRESHOLD = 0.25; // km
 const BAD_ACCURACY_THRESHOLD = 1000; // m
 
 type TrainDirection = 'INBOUND' | 'OUTBOUND';
