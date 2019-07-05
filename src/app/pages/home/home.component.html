@@ -15,7 +15,6 @@
             <p
               class="headerStationName"
               [@content]
-              [ngStyle]="getHeaderStationNameStyle(s.name)"
             >
               {{ s.name }}
             </p>
@@ -28,7 +27,6 @@
             <p class="headerUnit">{{ nextText }}</p>
             <p
               class="headerStationName"
-              [ngStyle]="getHeaderStationNameStyle(formedStations[1].name)"
             >
               {{ formedStations[1].name }}
             </p>
@@ -40,8 +38,7 @@
           >
             <p class="headerUnit">{{ nextText }}</p>
             <p
-              class="headerStationName"
-              [ngStyle]="getHeaderStationNameStyle(formedStations[1].name)"
+              class="headerStationName headerStationNameKana"
             >
               {{ hiraganaStationNames[formedStations[1].groupId] }}
             </p>
@@ -53,7 +50,7 @@
             *ngIf="formedStations.length"
           >
             <li class="stationWrapper" *ngFor="let s of formedStations">
-              <p class="stationsStationName" [ngStyle]="getStationsStationNameStyle(s.name)">
+              <p class="stationsStationName">
                 {{ s.name }}
               </p>
               <div

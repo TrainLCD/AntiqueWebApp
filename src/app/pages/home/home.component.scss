@@ -60,10 +60,11 @@
       flex: 1;
       text-align: center;
       margin-right: 10%;
+      font-size: 7.5vw;
       font-weight: bold;
     }
     .headerStationNameKana {
-      font-size: 1rem;
+      font-size: 6vw;
     }
   }
   .headerTop {
@@ -105,6 +106,7 @@
       font-weight: bold;
       height: 40%;
       text-align: right;
+      font-size: 5.5vh;
     }
 
     .lineDot {
@@ -156,5 +158,5 @@
   margin-top: 12px;
   margin-left: 12px;
   color: #aaa;
-  font-size: 0.75rem;
+  font-size: 1vw;
 }

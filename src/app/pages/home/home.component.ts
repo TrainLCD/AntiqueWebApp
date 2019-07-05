@@ -268,18 +268,6 @@ export class HomeComponent implements OnInit, OnDestroy {
     return `${lineColor ? `#${lineColor}` : '#333333'}`;
   }
 
-  public getHeaderStationNameStyle(stationName: string) {
-    const isKanaContent = this.headerContent === 'NEXT_STOP_KANA';
-    if (stationName.length > 5) {
-      return {
-        fontSize: isKanaContent ? '2rem' : '2.5rem'
-      };
-    }
-    return {
-      fontSize: isKanaContent ? '2.5em' : '3.5rem'
-    };
-  }
-
   private get isApproaching(): boolean {
     const nextStation = this.formedStations[1];
     if (!nextStation) {
@@ -311,12 +299,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       return 'まもなく';
     }
     return 'つぎは';
-  }
-
-  public getStationsStationNameStyle(stationName: string) {
-    return {
-      fontSize: stationName.length > 5 ? '1.25rem' : '1.5rem'
-    };
   }
 
   public get badAccuracy(): boolean {
