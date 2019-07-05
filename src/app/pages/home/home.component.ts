@@ -303,7 +303,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (!currentStation) {
       return null;
     }
-    return currentStation.distance < ARRIVED_THRESHOLD;
+    return currentStation.distance > ARRIVED_THRESHOLD;
   }
 
   public get nextText() {
