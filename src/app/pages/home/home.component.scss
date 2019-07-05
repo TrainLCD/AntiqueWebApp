@@ -141,6 +141,7 @@
       flex-wrap: wrap;
       .transferItem {
         display: flex;
+        align-items: center;
         margin-bottom: 12px;
         flex-basis: 50%;
         .transferLineDot {
