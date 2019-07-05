@@ -46,7 +46,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public fetchedStations = new BehaviorSubject<Station[]>([]);
   public boundStation: Station;
   private boundDirection: TrainDirection;
-  public headerContent: HeaderContent = this.initialHeaderContent;
+  public headerContent: HeaderContent = 'CURRENT_STATION';
   public bottomContent: BottomContent = 'LINE';
   private badAccuracyDismissed = false;
   public hiraganaStationNames: { [key: string]: string } = {};
@@ -356,17 +356,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
   */
 
-  private get initialHeaderContent(): HeaderContent {
-    if (this.isArrived) {
-      return 'CURRENT_STATION';
-    }
-    if (!this.formedStations.length) {
-      return 'CURRENT_STATION';
-    }
-    return 'NEXT_STOP';
-  }
 
   public transferLineDotStyle(lineId: string) {
+    if (!this.nextStationLinesWithoutCurrentLine) {
+      return;
+    }
     const line = this.nextStationLinesWithoutCurrentLine.filter(
       l => parseInt(l.id, 10) === parseInt(lineId, 10))[0];
     return {
@@ -375,6 +369,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public get nextStationLinesWithoutCurrentLine(): Line[] {
+    if (!this.formedStations[1]) {
+      return [];
+    }
     const withoutCurrentLine = this.formedStations[1].lines.filter(
       line => line.id !== this.currentLine.id
     );
