@@ -247,7 +247,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       return null;
     }
     const lineColor = this.currentLine ? this.currentLine.lineColorC : null;
-    return `${lineColor ? `#${lineColor}` : '#333'}`;
+    return `${lineColor ? `#${lineColor}` : '#333333'}`;
   }
 
   public getHeaderStationNameStyle(stationName: string) {
