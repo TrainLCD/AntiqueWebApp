@@ -4,9 +4,7 @@ import { InMemoryCache } from 'apollo-cache-inmemory';
 
 import { NgModule } from '@angular/core';
 
-import { environment } from '../environments/environment';
-
-const uri = environment.sapiEndpoint;
+const uri = 'https://sapi.tinykitten.me';
 export function createApollo(httpLink: HttpLink) {
   return {
     link: httpLink.create({ uri }),

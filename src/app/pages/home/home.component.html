@@ -33,6 +33,19 @@
               {{ formedStations[1].name }}
             </p>
           </div>
+          <div
+            class="headerBottom"
+            [@content]="headerContent === 'NEXT_STOP_KANA' ? 'open' : 'closed'"
+            *ngIf="headerContent === 'NEXT_STOP_KANA' && formedStations[1]"
+          >
+            <p class="headerUnit">{{ nextText }}</p>
+            <p
+              class="headerStationName"
+              [ngStyle]="getHeaderStationNameStyle(formedStations[1].name)"
+            >
+              {{ hiraganaStationNames[formedStations[1].groupId] }}
+            </p>
+          </div>
         </header>
         <main class="bottom">
           <ul

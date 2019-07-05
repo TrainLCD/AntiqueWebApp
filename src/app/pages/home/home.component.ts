@@ -4,18 +4,20 @@ import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, HostBinding, OnDestroy, OnInit } from '@angular/core';
 import { DomSanitizer } from '@angular/platform-browser';
 
+import { environment } from '../../../environments/environment';
 import { Station } from '../../models/StationAPI';
 import { DistanceService } from '../../services/distance/distance.service';
 import { GeolocationService } from '../../services/geolocation/geolocation.service';
+import { HiraganaService } from '../../services/hiragana/hiragana.service';
 import { StationApiService } from '../../services/station-api/station-api.service';
-
-type TrainDirection = 'INBOUND' | 'OUTBOUND';
-type HeaderContent = 'CURRENT_STATION' | 'NEXT_STOP';
 
 const CONTENT_TRANSITION_INTERVAL = 5000; // ms
 const APPROACHING_THRESHOLD = 750; // m
 const ARRIVED_THRESHOLD = 0.5; // km
 const BAD_ACCURACY_THRESHOLD = 1000; // m
+
+type TrainDirection = 'INBOUND' | 'OUTBOUND';
+type HeaderContent = 'CURRENT_STATION' | 'NEXT_STOP' | 'NEXT_STOP_KANA';
 
 @Component({
   selector: 'app-home',
@@ -42,14 +44,16 @@ export class HomeComponent implements OnInit, OnDestroy {
   public fetchedStations = new BehaviorSubject<Station[]>([]);
   public boundStation: Station;
   private boundDirection: TrainDirection;
-  public headerContent: HeaderContent = 'CURRENT_STATION';
+  public headerContent: HeaderContent = this.initialHeaderContent;
   private badAccuracyDismissed = false;
+  public hiraganaStationNames: { [key: string]: string } = {};
 
   constructor(
     private geolocationService: GeolocationService,
     private stationApiService: StationApiService,
     private distanceService: DistanceService,
-    private sanitizer: DomSanitizer
+    private sanitizer: DomSanitizer,
+    private hiraganaService: HiraganaService
   ) {}
 
   ngOnInit() {
@@ -125,6 +129,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       .fetchStationsByLineId(intLineId)
       .subscribe(stations => {
         this.fetchedStations.next(stations);
+        this.transformAllStationNameToHiragana(stations);
       });
     this.subscriptions.push(fetchByLineIdSub);
   }
@@ -138,7 +143,18 @@ export class HomeComponent implements OnInit, OnDestroy {
           }
           break;
         case 'NEXT_STOP':
-          this.headerContent = 'CURRENT_STATION';
+          if (this.hiraganaStationNames[this.formedStations[1].groupId]) {
+            this.headerContent = 'NEXT_STOP_KANA';
+          } else {
+            this.headerContent = 'CURRENT_STATION';
+          }
+          break;
+        case 'NEXT_STOP_KANA':
+          if (this.isArrived) {
+            this.headerContent = 'CURRENT_STATION';
+          } else {
+            this.headerContent = 'NEXT_STOP';
+          }
           break;
       }
     }, CONTENT_TRANSITION_INTERVAL);
@@ -168,6 +184,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public get isLoopLine() {
+    if (!this.selectedLineId) {
+      return false;
+    }
     // 11302: 山手線, 11623: 大阪環状線
     const selectedLineIdStr = this.selectedLineId.toString();
     return selectedLineIdStr === '11302' || selectedLineIdStr === '11623';
@@ -210,7 +229,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     return stations.findIndex(s => s.groupId === currentStation.groupId);
   }
 
-  public get formedStations() {
+  public get formedStations(): Station[] {
     const stations = this.fetchedStations.getValue();
 
     if (this.isLoopLine) {
@@ -251,17 +270,18 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public getHeaderStationNameStyle(stationName: string) {
+    const isKanaContent = this.headerContent === 'NEXT_STOP_KANA';
     if (stationName.length > 5) {
       return {
-        fontSize: '2.5rem'
+        fontSize: isKanaContent ? '2rem' : '2.5rem'
       };
     }
     return {
-      fontSize: '3.5rem'
+      fontSize: isKanaContent ? '2.5em' : '3.5rem'
     };
   }
 
-  public get nextText() {
+  private get isApproaching(): boolean {
     const nextStation = this.formedStations[1];
     if (!nextStation) {
       return null;
@@ -276,7 +296,19 @@ export class HomeComponent implements OnInit, OnDestroy {
     );
     // APPROACHING_THRESHOLD以上次の駅から離れている: つぎは
     // APPROACHING_THRESHOLDより近い: まもなく
-    if (nextStationDistance < APPROACHING_THRESHOLD) {
+    return nextStationDistance < APPROACHING_THRESHOLD;
+  }
+
+  private get isArrived(): boolean {
+    const currentStation = this.station.getValue();
+    if (!currentStation) {
+      return null;
+    }
+    return currentStation.distance < ARRIVED_THRESHOLD;
+  }
+
+  public get nextText() {
+    if (this.isApproaching) {
       return 'まもなく';
     }
     return 'つぎは';
@@ -301,5 +333,23 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   public dismissBadAccuracy() {
     this.badAccuracyDismissed = true;
+  }
+
+  private transformAllStationNameToHiragana(stations: Station[]) {
+    stations.map(station => {
+      this.hiraganaService.toHiragana(station.name).subscribe(hiragana => {
+        this.hiraganaStationNames[station.groupId] = hiragana;
+      });
+    });
+  }
+
+  private get initialHeaderContent(): HeaderContent {
+    if (this.isArrived) {
+      return 'CURRENT_STATION';
+    }
+    if (!this.formedStations.length) {
+      return 'CURRENT_STATION';
+    }
+    return 'NEXT_STOP';
   }
 }
