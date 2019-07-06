@@ -10,7 +10,8 @@ import { GeolocationService } from '../../services/geolocation/geolocation.servi
 import { StationApiService } from '../../services/station-api/station-api.service';
 
 const HEADER_CONTENT_TRANSITION_INTERVAL = 5000; // ms
-const BOTTOM_CONTENT_TRANSITION_INTERVAL = HEADER_CONTENT_TRANSITION_INTERVAL * 2; // ms
+const BOTTOM_CONTENT_TRANSITION_INTERVAL =
+  HEADER_CONTENT_TRANSITION_INTERVAL * 2; // ms
 const APPROACHING_THRESHOLD = 750; // m
 const ARRIVED_THRESHOLD = 0.25; // km
 const BAD_ACCURACY_THRESHOLD = 1000; // m
@@ -157,7 +158,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         // this.headerContent = 'NEXT_STOP_KANA';
         if (this.isArrived) {
           this.headerContent = 'CURRENT_STATION';
-          }
+        }
         break;
       case 'NEXT_STOP_KANA':
         if (this.isArrived) {
@@ -201,6 +202,23 @@ export class HomeComponent implements OnInit, OnDestroy {
     return stations[0];
   }
 
+  // 環状運転している電車は中間地点を方面にする
+  public get inboundStationForLoopline() {
+    const stations = this.fetchedStations.getValue();
+    const maybeIndex = this.currentStationIndex - 4;
+    const fallbackIndex = (stations.length - 1) - 7;
+    const index = maybeIndex < 0 || maybeIndex > stations.length ? fallbackIndex : maybeIndex;
+    return stations[index];
+  }
+
+  public get outboundStationForLoopline() {
+    const stations = this.fetchedStations.getValue();
+    const maybeIndex = this.currentStationIndex + 4;
+    const fallbackIndex = Math.floor((stations.length - 1) / 4);
+    const index = maybeIndex < 0 || maybeIndex > stations.length ? fallbackIndex : maybeIndex;
+    return stations[index];
+  }
+
   public get isLoopLine() {
     if (!this.selectedLineId) {
       return false;
@@ -222,17 +240,38 @@ export class HomeComponent implements OnInit, OnDestroy {
             .slice(0, 6)
         ];
       }
-      return stations
+
+      // 環状線表示駅残り少ない
+      const inboundPendingStations = stations
         .slice(
           this.currentStationIndex - 7 > 0 ? this.currentStationIndex - 7 : 0,
           this.currentStationIndex + 1
         )
         .reverse();
+      if (this.currentStationIndex < 7 && this.isLoopLine) {
+        const nextStations = stations
+          .slice()
+          .reverse()
+          .slice(0, this.currentStationIndex - 1);
+        return [...inboundPendingStations, ...nextStations];
+      }
+      return inboundPendingStations;
     }
 
+    // 環状線折返し駅
     if (this.currentStationIndex === stations.length - 1 && this.isLoopLine) {
       // 山手線は折り返す
       return [stations[this.currentStationIndex], ...stations.slice(0, 6)];
+    }
+
+    const outboundPendingStationCount =
+      stations.length - this.currentStationIndex - 1;
+    // 環状線表示駅残り少ない
+    if (outboundPendingStationCount < 7 && this.isLoopLine) {
+      return [
+        ...stations.slice(this.currentStationIndex),
+        ...stations.slice(0, 7 - outboundPendingStationCount)
+      ];
     }
 
     return stations.slice(
@@ -317,7 +356,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     if (this.isApproaching) {
       return 'まもなく';
     }
-    return 'つぎは';
+    if (this.headerContent === 'NEXT_STOP_KANA') {
+      return 'つぎは';
+    }
+    return '次は';
   }
 
   public get badAccuracy(): boolean {
@@ -340,7 +382,8 @@ export class HomeComponent implements OnInit, OnDestroy {
       return;
     }
     const line = this.nextStationLinesWithoutCurrentLine.filter(
-      l => parseInt(l.id, 10) === parseInt(lineId, 10))[0];
+      l => parseInt(l.id, 10) === parseInt(lineId, 10)
+    )[0];
     return {
       background: `#${line.lineColorC ? line.lineColorC : '333333'}`
     };
