@@ -375,9 +375,9 @@ export class HomeComponent implements OnInit, OnDestroy {
     const withoutCurrentLine = this.formedStations[1].lines.filter(
       line => line.id !== this.currentLine.id
     );
-    const jrLines = withoutCurrentLine.filter(line => line.name.startsWith('JR'));
+    const jrLines = withoutCurrentLine.filter(line => this.isJRLine(line));
     if (jrLines.length > OMIT_JR_THRESHOLD) {
-      const withoutJR = withoutCurrentLine.filter(line => !line.name.startsWith('JR'));
+      const withoutJR = withoutCurrentLine.filter(line => !this.isJRLine(line));
       withoutJR.unshift({
         id: '0',
         lineColorC: '008000', // 関西の人間に喧嘩を売る配色
@@ -387,5 +387,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       return withoutJR;
     }
     return withoutCurrentLine;
+  }
+
+  public isJRLine(line: Line) {
+    return line.name.startsWith('JR') || line.name === '上野東京ライン';
   }
 }
