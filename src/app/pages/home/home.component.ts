@@ -7,7 +7,6 @@ import { DomSanitizer } from '@angular/platform-browser';
 import { Station, Line } from '../../models/StationAPI';
 import { DistanceService } from '../../services/distance/distance.service';
 import { GeolocationService } from '../../services/geolocation/geolocation.service';
-import { HiraganaService } from '../../services/hiragana/hiragana.service';
 import { StationApiService } from '../../services/station-api/station-api.service';
 
 const HEADER_CONTENT_TRANSITION_INTERVAL = 5000; // ms
@@ -49,14 +48,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   public headerContent: HeaderContent = 'CURRENT_STATION';
   public bottomContent: BottomContent = 'LINE';
   private badAccuracyDismissed = false;
-  public hiraganaStationNames: { [key: string]: string } = {};
 
   constructor(
     private geolocationService: GeolocationService,
     private stationApiService: StationApiService,
     private distanceService: DistanceService,
-    private sanitizer: DomSanitizer,
-    private hiraganaService: HiraganaService
+    private sanitizer: DomSanitizer
   ) {}
 
   ngOnInit() {
@@ -132,8 +129,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       .fetchStationsByLineId(intLineId)
       .subscribe(stations => {
         this.fetchedStations.next(stations);
-        // ひらがな取得は一旦中止
-        // this.transformAllStationNameToHiragana(stations);
       });
     this.subscriptions.push(fetchByLineIdSub);
   }
@@ -159,13 +154,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         }
         break;
       case 'NEXT_STOP':
-        /*
-        if (this.hiraganaStationNames[this.formedStations[1].groupId]) {
-          this.headerContent = 'NEXT_STOP_KANA';
-        } else {
-          this.headerContent = 'CURRENT_STATION';
-        }
-        */
+        // this.headerContent = 'NEXT_STOP_KANA';
         if (this.isArrived) {
           this.headerContent = 'CURRENT_STATION';
           }
@@ -345,17 +334,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   public dismissBadAccuracy() {
     this.badAccuracyDismissed = true;
   }
-
-  /*
-  private transformAllStationNameToHiragana(stations: Station[]) {
-    stations.map(station => {
-      this.hiraganaService.toHiragana(station.name).subscribe(hiragana => {
-        this.hiraganaStationNames[station.groupId] = hiragana;
-      });
-    });
-  }
-  */
-
 
   public transferLineDotStyle(lineId: string) {
     if (!this.nextStationLinesWithoutCurrentLine) {
