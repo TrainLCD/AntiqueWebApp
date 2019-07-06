@@ -220,12 +220,23 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public get isLoopLine() {
+    return this.isYamanoteLine || this.isOsakaLoopLine;
+  }
+
+  private get isYamanoteLine() {
     if (!this.selectedLineId) {
       return false;
     }
-    // 11302: 山手線, 11623: 大阪環状線
     const selectedLineIdStr = this.selectedLineId.toString();
-    return selectedLineIdStr === '11302' || selectedLineIdStr === '11623';
+    return selectedLineIdStr === '11302';
+  }
+
+  private get isOsakaLoopLine() {
+    if (!this.selectedLineId) {
+      return false;
+    }
+    const selectedLineIdStr = this.selectedLineId.toString();
+    return selectedLineIdStr === '11623';
   }
 
   private formedStationsForRingOperation(stations: Station[]) {
@@ -248,7 +259,16 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.currentStationIndex + 1
         )
         .reverse();
-      if (this.currentStationIndex < 7 && this.isLoopLine) {
+
+      // 山手線と大阪環状線はちょっと処理が違う
+      if (this.currentStationIndex < 7 && this.isOsakaLoopLine) {
+        const nextStations = stations
+          .slice()
+          .reverse()
+          .slice(this.currentStationIndex - 1, 6);
+        return [...inboundPendingStations, ...nextStations];
+      }
+      if (this.currentStationIndex < 7 && this.isYamanoteLine) {
         const nextStations = stations
           .slice()
           .reverse()
