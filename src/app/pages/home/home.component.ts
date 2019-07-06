@@ -239,7 +239,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     return selectedLineIdStr === '11623';
   }
 
-  private formedStationsForRingOperation(stations: Station[]) {
+  private formedStationsForLoopOperation(stations: Station[]) {
     if (this.boundDirection === 'INBOUND') {
       if (this.currentStationIndex === 0 && this.isLoopLine) {
         // 山手線は折り返す
@@ -310,7 +310,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const stations = this.fetchedStations.getValue();
 
     if (this.isLoopLine) {
-      return this.formedStationsForRingOperation(stations);
+      return this.formedStationsForLoopOperation(stations);
     }
 
     if (this.boundDirection === 'OUTBOUND') {
