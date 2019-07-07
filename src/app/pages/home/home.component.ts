@@ -49,6 +49,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public headerContent: HeaderContent = 'CURRENT_STATION';
   public bottomContent: BottomContent = 'LINE';
   private badAccuracyDismissed = false;
+  private scoredStations: Station[] = []; // distanceでソートされている
 
   constructor(
     private geolocationService: GeolocationService,
@@ -87,24 +88,28 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public getRefreshConditions(station: Station) {
-    return !this.selectedLineId ||
-    (station.lines.filter(
-      l => parseInt(l.id, 10) === this.selectedLineId
-    ).length &&
-      station.distance < ARRIVED_THRESHOLD);
+    if (this.station) {
+      return true;
+    }
+    return (
+      !this.selectedLineId ||
+      (station.lines.filter(l => parseInt(l.id, 10) === this.selectedLineId)
+        .length &&
+        station.distance < ARRIVED_THRESHOLD)
+    );
   }
 
   private fetchNearestStationFromAPI(latitude: number, longitude: number) {
     const fetchStationSub = this.stationApiService
-    .fetchNearestStation(latitude, longitude)
-    .subscribe(station => {
-      // 路線が選択されているときは違う駅の情報は無視する
-      // ARRIVED_THRESHOLDより離れている場合無視する
-      const conditions = this.getRefreshConditions(station);
-      if (!!conditions) {
-        this.station.next(station);
-      }
-    });
+      .fetchNearestStation(latitude, longitude)
+      .subscribe(station => {
+        // 路線が選択されているときは違う駅の情報は無視する
+        // ARRIVED_THRESHOLDより離れている場合無視する
+        const conditions = this.getRefreshConditions(station);
+        if (!!conditions) {
+          this.station.next(station);
+        }
+      });
     this.subscriptions.push(fetchStationSub);
   }
 
@@ -117,7 +122,9 @@ export class HomeComponent implements OnInit, OnDestroy {
         if (!this.fetchedStations.getValue().length) {
           this.fetchNearestStationFromAPI(latitude, longitude);
         }
-        const nearestStation = this.calcStationDistances(latitude, longitude)[0];
+        const scoredStations = this.calcStationDistances(latitude, longitude);
+        this.scoredStations = scoredStations;
+        const nearestStation = scoredStations[0];
         const conditions = this.getRefreshConditions(nearestStation);
         if (!!conditions) {
           this.station.next(nearestStation);
@@ -145,7 +152,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       .subscribe(stations => {
         this.fetchedStations.next(stations);
         const { latitude, longitude } = this.currentCoordinates;
-        const nearestStation = this.calcStationDistances(latitude, longitude)[0];
+        const scoredStations = this.calcStationDistances(latitude, longitude);
+        this.scoredStations = scoredStations;
+        const nearestStation = scoredStations[0];
         this.station.next(nearestStation);
       });
     this.subscriptions.push(fetchByLineIdSub);
@@ -153,14 +162,14 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   private calcStationDistances(latitude: number, longitude: number): Station[] {
     const fetchedStations = this.fetchedStations.getValue();
-    const mapped = fetchedStations.map(station => {
+    const scored = fetchedStations.map(station => {
       const distance = this.distanceService.calcHubenyDistance(
         { latitude, longitude },
         { latitude: station.latitude, longitude: station.longitude }
       );
       return { ...station, distance };
     });
-    mapped.sort((a, b) => {
+    scored.sort((a, b) => {
       if (a.distance < b.distance) {
         return -1;
       }
@@ -169,7 +178,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       }
       return 0;
     });
-    return mapped;
+    return scored;
   }
 
   private switchBottom() {
@@ -415,9 +424,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private get isArrived(): boolean {
-    const currentStation = this.station.getValue();
+    const currentStation = this.scoredStations[0];
     if (!currentStation) {
-      return null;
+      return false;
     }
     return currentStation.distance < ARRIVED_THRESHOLD;
   }
