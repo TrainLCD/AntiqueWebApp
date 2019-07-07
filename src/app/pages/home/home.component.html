@@ -62,13 +62,14 @@
               <p class="stationsStationName">
                 {{ s.name }}
               </p>
-              <div
-                [class]="
-                  s.name !== station.getValue().name
-                    ? 'lineDot'
-                    : 'lineDot lineDotCurrent'
-                "
-              ></div>
+              <div class="lineDot">
+                <img
+                  *ngIf="s.name === station.getValue().name"
+                  [ngClass]="!isArrived && boundStation.name !== s.name ? 'chevron' : 'chevron chevronArrived'"
+                  src="/assets/train.svg"
+                  alt="current"
+                />
+              </div>
             </li>
           </ul>
 

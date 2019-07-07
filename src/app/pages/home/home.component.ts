@@ -376,7 +376,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     return nextStationDistance < APPROACHING_THRESHOLD;
   }
 
-  private get isArrived(): boolean {
+  public get isArrived(): boolean {
     const currentStation = this.station.getValue();
     if (!currentStation) {
       return null;
