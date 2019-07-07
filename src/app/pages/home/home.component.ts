@@ -460,11 +460,12 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public isJRLine(line: Line) {
-    return line.name.startsWith('JR') || line.name === '上野東京ライン';
+    const exceptedJRLines = ['上野東京ライン', '京都線', '大阪環状線']; // TODO: StationAPI側でなんとかする
+    return line.name.startsWith('JR') || exceptedJRLines.indexOf(line.name) !== -1;
   }
 
   public headerStationNameStyle(stationName: string) {
-    if (stationName.length > 5) {
+    if (stationName.length > 6) {
       return {
         fontSize: '5vw'
       };
