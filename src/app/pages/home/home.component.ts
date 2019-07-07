@@ -462,4 +462,15 @@ export class HomeComponent implements OnInit, OnDestroy {
   public isJRLine(line: Line) {
     return line.name.startsWith('JR') || line.name === '上野東京ライン';
   }
+
+  public headerStationNameStyle(stationName: string) {
+    if (stationName.length > 5) {
+      return {
+        fontSize: '5vw'
+      };
+    }
+    return {
+      fontSize: '7.5vw'
+    };
+  }
 }

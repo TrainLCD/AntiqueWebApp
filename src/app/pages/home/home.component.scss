@@ -62,11 +62,7 @@
       flex: 1;
       text-align: center;
       margin-right: 10%;
-      font-size: 7.5vw;
       font-weight: bold;
-    }
-    .headerStationNameKana {
-      font-size: 6vw;
     }
   }
   .headerTop {
@@ -104,7 +100,7 @@
     .stationsStationName {
       -ms-writing-mode: tb-lr;
       writing-mode: vertical-lr;
-      vertical-align: middle;
+      text-orientation: upright;
       font-weight: bold;
       height: 40%;
       text-align: right;

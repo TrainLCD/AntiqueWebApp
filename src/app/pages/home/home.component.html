@@ -18,27 +18,37 @@
             *ngIf="headerContent === 'CURRENT_STATION'"
           >
             <p class="headerUnit">ただいま</p>
-            <p class="headerStationName" [@content]>
+            <p
+              class="headerStationName"
+              [@content]
+              [ngStyle]="headerStationNameStyle(s.name)"
+            >
               {{ s.name }}
             </p>
           </div>
           <div
             class="headerBottom"
-            [@content]="headerContent === 'NEXT_STOP' ? 'open' : 'closed'"
+            [@content]
             *ngIf="headerContent === 'NEXT_STOP' && formedStations[1]"
           >
             <p class="headerUnit">{{ nextText }}</p>
-            <p class="headerStationName">
+            <p
+              class="headerStationName"
+              [ngStyle]="headerStationNameStyle(formedStations[1].name)"
+            >
               {{ formedStations[1].name }}
             </p>
           </div>
           <div
             class="headerBottom"
-            [@content]="headerContent === 'NEXT_STOP_KANA' ? 'open' : 'closed'"
+            [@content]
             *ngIf="headerContent === 'NEXT_STOP_KANA' && formedStations[1]"
           >
             <p class="headerUnit">{{ nextText }}</p>
-            <p class="headerStationName headerStationNameKana">
+            <p
+              class="headerStationName"
+              　[ngStyle]="headerStationNameStyle(s.name)"
+            >
               <!-- {{ hiraganaStationNames[formedStations[1].groupId] }} -->
             </p>
           </div>
@@ -65,10 +75,7 @@
           <div class="transfer" *ngIf="bottomContent === 'TRANSFER'">
             <h2 class="transferTitle">のりかえ</h2>
             <div class="transferList">
-              <div
-                *ngFor="let line of transferLines"
-                class="transferItem"
-              >
+              <div *ngFor="let line of transferLines" class="transferItem">
                 <div
                   class="transferLineDot"
                   [ngStyle]="transferLineDotStyle(line.id)"
