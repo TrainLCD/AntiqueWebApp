@@ -438,7 +438,7 @@ export class HomeComponent implements OnInit, OnDestroy {
       line => line.id !== this.currentLine.id
     );
     const jrLines = withoutCurrentLine.filter(line => this.isJRLine(line));
-    if (jrLines.length > OMIT_JR_THRESHOLD) {
+    if (jrLines.length >= OMIT_JR_THRESHOLD) {
       const withoutJR = withoutCurrentLine.filter(line => !this.isJRLine(line));
       withoutJR.unshift({
         id: '0',
