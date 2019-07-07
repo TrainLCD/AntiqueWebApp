@@ -137,7 +137,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   private switchBottom() {
     switch (this.bottomContent) {
       case 'LINE':
-        if (this.nextStationLinesWithoutCurrentLine.length) {
+        if (
+          this.isArrived &&
+          this.currentStationLinesWithoutCurrentLine.length
+        ) {
+          this.bottomContent = 'TRANSFER';
+        }
+        if (!this.isArrived && this.nextStationLinesWithoutCurrentLine.length) {
           this.bottomContent = 'TRANSFER';
         }
         break;
@@ -206,8 +212,11 @@ export class HomeComponent implements OnInit, OnDestroy {
   public get inboundStationForLoopline() {
     const stations = this.fetchedStations.getValue();
     const maybeIndex = this.currentStationIndex - 4;
-    const fallbackIndex = (stations.length - 1) - 7;
-    const index = maybeIndex < 0 || maybeIndex > stations.length ? fallbackIndex : maybeIndex;
+    const fallbackIndex = stations.length - 1 - 7;
+    const index =
+      maybeIndex < 0 || maybeIndex > stations.length
+        ? fallbackIndex
+        : maybeIndex;
     return stations[index];
   }
 
@@ -215,7 +224,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     const stations = this.fetchedStations.getValue();
     const maybeIndex = this.currentStationIndex + 4;
     const fallbackIndex = Math.floor((stations.length - 1) / 4);
-    const index = maybeIndex < 0 || maybeIndex > stations.length ? fallbackIndex : maybeIndex;
+    const index =
+      maybeIndex < 0 || maybeIndex > stations.length
+        ? fallbackIndex
+        : maybeIndex;
     return stations[index];
   }
 
@@ -398,22 +410,31 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public transferLineDotStyle(lineId: string) {
-    if (!this.nextStationLinesWithoutCurrentLine) {
+    if (!this.isArrived && !this.nextStationLinesWithoutCurrentLine) {
       return;
     }
-    const line = this.nextStationLinesWithoutCurrentLine.filter(
-      l => parseInt(l.id, 10) === parseInt(lineId, 10)
-    )[0];
+    if (this.isArrived && !this.currentStationLinesWithoutCurrentLine) {
+      return;
+    }
+    const line = (this.isArrived
+      ? this.currentStationLinesWithoutCurrentLine
+      : this.nextStationLinesWithoutCurrentLine
+    ).filter(l => parseInt(l.id, 10) === parseInt(lineId, 10))[0];
     return {
       background: `#${line.lineColorC ? line.lineColorC : '333333'}`
     };
   }
 
-  public get nextStationLinesWithoutCurrentLine(): Line[] {
-    if (!this.formedStations[1]) {
-      return [];
+  public get transferLines(): Line[] {
+    // 到着時は現在の駅の乗換情報を表示する
+    if (this.isArrived) {
+      return this.currentStationLinesWithoutCurrentLine;
     }
-    const withoutCurrentLine = this.formedStations[1].lines.filter(
+    return this.nextStationLinesWithoutCurrentLine;
+  }
+
+  private omitJRLinesIfThresholdExceeded(stationIndex: number): Line[] {
+    const withoutCurrentLine = this.formedStations[stationIndex].lines.filter(
       line => line.id !== this.currentLine.id
     );
     const jrLines = withoutCurrentLine.filter(line => this.isJRLine(line));
@@ -428,6 +449,14 @@ export class HomeComponent implements OnInit, OnDestroy {
       return withoutJR;
     }
     return withoutCurrentLine;
+  }
+
+  private get currentStationLinesWithoutCurrentLine(): Line[] {
+    return this.omitJRLinesIfThresholdExceeded(0);
+  }
+
+  private get nextStationLinesWithoutCurrentLine(): Line[] {
+    return this.omitJRLinesIfThresholdExceeded(1);
   }
 
   public isJRLine(line: Line) {
