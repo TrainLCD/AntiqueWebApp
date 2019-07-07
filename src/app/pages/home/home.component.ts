@@ -465,7 +465,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public headerStationNameStyle(stationName: string) {
-    if (stationName.length > 6) {
+    if (stationName.length > 10) {
       return {
         fontSize: '5vw'
       };
