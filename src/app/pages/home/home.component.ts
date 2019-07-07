@@ -13,7 +13,7 @@ const HEADER_CONTENT_TRANSITION_INTERVAL = 5000; // ms
 const BOTTOM_CONTENT_TRANSITION_INTERVAL =
   HEADER_CONTENT_TRANSITION_INTERVAL * 2; // ms
 const APPROACHING_THRESHOLD = 750; // m
-const ARRIVED_THRESHOLD = 0.25; // km
+const ARRIVED_THRESHOLD = 250; // m
 const BAD_ACCURACY_THRESHOLD = 1000; // m
 const OMIT_JR_THRESHOLD = 3; // これ以上JR線があったら「JR線」で省略しよう
 
@@ -86,28 +86,42 @@ export class HomeComponent implements OnInit, OnDestroy {
     }d2, ${this.selectedLineColor}ff)`;
   }
 
+  public getRefreshConditions(station: Station) {
+    return !this.selectedLineId ||
+    (station.lines.filter(
+      l => parseInt(l.id, 10) === this.selectedLineId
+    ).length &&
+      station.distance < ARRIVED_THRESHOLD);
+  }
+
+  private fetchNearestStationFromAPI(latitude: number, longitude: number) {
+    const fetchStationSub = this.stationApiService
+    .fetchNearestStation(latitude, longitude)
+    .subscribe(station => {
+      // 路線が選択されているときは違う駅の情報は無視する
+      // ARRIVED_THRESHOLDより離れている場合無視する
+      const conditions = this.getRefreshConditions(station);
+      if (!!conditions) {
+        this.station.next(station);
+      }
+    });
+    this.subscriptions.push(fetchStationSub);
+  }
+
   private init() {
     const watchPositionSub = this.geolocationService
       .watchPosition()
       .subscribe(pos => {
         this.currentCoordinates = pos.coords;
         const { latitude, longitude } = pos.coords;
-        const fetchStationSub = this.stationApiService
-          .fetchNearestStation(latitude, longitude)
-          .subscribe(station => {
-            // 路線が選択されているときは違う駅の情報は無視する
-            // ARRIVED_THRESHOLDより離れている場合無視する
-            const conditions =
-              !this.selectedLineId ||
-              (station.lines.filter(
-                l => parseInt(l.id, 10) === this.selectedLineId
-              ).length &&
-                station.distance < ARRIVED_THRESHOLD);
-            if (!!conditions) {
-              this.station.next(station);
-            }
-          });
-        this.subscriptions.push(fetchStationSub);
+        if (!this.fetchedStations.getValue().length) {
+          this.fetchNearestStationFromAPI(latitude, longitude);
+        }
+        const nearestStation = this.calcStationDistances(latitude, longitude)[0];
+        const conditions = this.getRefreshConditions(nearestStation);
+        if (!!conditions) {
+          this.station.next(nearestStation);
+        }
       });
     this.subscriptions.push(watchPositionSub);
   }
@@ -130,8 +144,32 @@ export class HomeComponent implements OnInit, OnDestroy {
       .fetchStationsByLineId(intLineId)
       .subscribe(stations => {
         this.fetchedStations.next(stations);
+        const { latitude, longitude } = this.currentCoordinates;
+        const nearestStation = this.calcStationDistances(latitude, longitude)[0];
+        this.station.next(nearestStation);
       });
     this.subscriptions.push(fetchByLineIdSub);
+  }
+
+  private calcStationDistances(latitude: number, longitude: number): Station[] {
+    const fetchedStations = this.fetchedStations.getValue();
+    const mapped = fetchedStations.map(station => {
+      const distance = this.distanceService.calcHubenyDistance(
+        { latitude, longitude },
+        { latitude: station.latitude, longitude: station.longitude }
+      );
+      return { ...station, distance };
+    });
+    mapped.sort((a, b) => {
+      if (a.distance < b.distance) {
+        return -1;
+      }
+      if (a.distance > b.distance) {
+        return 1;
+      }
+      return 0;
+    });
+    return mapped;
   }
 
   private switchBottom() {
@@ -461,7 +499,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   public isJRLine(line: Line) {
     const exceptedJRLines = ['上野東京ライン', '京都線', '大阪環状線']; // TODO: StationAPI側でなんとかする
-    return line.name.startsWith('JR') || exceptedJRLines.indexOf(line.name) !== -1;
+    return (
+      line.name.startsWith('JR') || exceptedJRLines.indexOf(line.name) !== -1
+    );
   }
 
   public headerStationNameStyle(stationName: string) {
