@@ -12,8 +12,8 @@ import { StationApiService } from '../../services/station-api/station-api.servic
 const HEADER_CONTENT_TRANSITION_INTERVAL = 5000; // ms
 const BOTTOM_CONTENT_TRANSITION_INTERVAL =
   HEADER_CONTENT_TRANSITION_INTERVAL * 2; // ms
-const APPROACHING_THRESHOLD = 800; // m
-const ARRIVED_THRESHOLD = 100; // m
+const APPROACHING_THRESHOLD = 400; // m
+const ARRIVED_THRESHOLD = 200; // m
 const BAD_ACCURACY_THRESHOLD = 1000; // m
 const OMIT_JR_THRESHOLD = 3; // これ以上JR線があったら「JR線」で省略しよう
 
@@ -88,9 +88,6 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public getRefreshConditions(station: Station) {
-    if (this.station) {
-      return true;
-    }
     return (
       !this.selectedLineId ||
       (station.lines.filter(l => parseInt(l.id, 10) === this.selectedLineId)
@@ -406,21 +403,13 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private get isApproaching(): boolean {
-    const nextStation = this.formedStations[1];
+    const nextStation = this.scoredStations[1];
     if (!nextStation) {
       return null;
     }
-    const nextStationCoordinates: Partial<Coordinates> = {
-      latitude: nextStation.latitude,
-      longitude: nextStation.longitude
-    };
-    const nextStationDistance = this.distanceService.calcHubenyDistance(
-      this.currentCoordinates,
-      nextStationCoordinates
-    );
     // APPROACHING_THRESHOLD以上次の駅から離れている: つぎは
     // APPROACHING_THRESHOLDより近い: まもなく
-    return nextStationDistance < APPROACHING_THRESHOLD;
+    return nextStation.distance < APPROACHING_THRESHOLD;
   }
 
   private get isArrived(): boolean {
