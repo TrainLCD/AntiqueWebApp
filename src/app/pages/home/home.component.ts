@@ -200,7 +200,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private switchHeader() {
     switch (this.headerContent) {
       case 'CURRENT_STATION':
-        if (this.formedStations.length > 1) {
+        if (this.formedStations.length > 1 && !this.isArrived) {
           this.headerContent = 'NEXT_STOP';
         }
         break;
