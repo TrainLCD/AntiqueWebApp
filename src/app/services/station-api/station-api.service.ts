@@ -21,6 +21,7 @@ export class StationApiService {
           stationByCoords(latitude: ${latitude}, longitude: ${longitude}) {
             groupId
             name
+            nameK
             address
             distance
             latitude
@@ -51,6 +52,7 @@ export class StationApiService {
         {
           station(id: ${groupId}) {
             name
+            nameK
             address
             latitude
             longitude
@@ -81,6 +83,7 @@ export class StationApiService {
           stationsByLineId(lineId: ${lineId}) {
             groupId
             name
+            nameK
             address
             latitude
             longitude

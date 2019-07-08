@@ -18,7 +18,11 @@ const BAD_ACCURACY_THRESHOLD = 1000; // m
 const OMIT_JR_THRESHOLD = 3; // これ以上JR線があったら「JR線」で省略しよう
 
 type TrainDirection = 'INBOUND' | 'OUTBOUND';
-type HeaderContent = 'CURRENT_STATION' | 'NEXT_STOP' | 'NEXT_STOP_KANA';
+type HeaderContent =
+  | 'CURRENT_STATION'
+  | 'CURRENT_STATION_KANA'
+  | 'NEXT_STOP'
+  | 'NEXT_STOP_KANA';
 type BottomContent = 'LINE' | 'TRANSFER';
 
 @Component({
@@ -200,14 +204,26 @@ export class HomeComponent implements OnInit, OnDestroy {
   private switchHeader() {
     switch (this.headerContent) {
       case 'CURRENT_STATION':
+        if (this.isArrived) {
+          this.headerContent = 'CURRENT_STATION_KANA';
+        }
+        if (this.formedStations.length > 1 && !this.isArrived) {
+          this.headerContent = 'NEXT_STOP';
+        }
+        break;
+      case 'CURRENT_STATION_KANA':
+        if (this.isArrived) {
+          this.headerContent = 'CURRENT_STATION';
+        }
         if (this.formedStations.length > 1 && !this.isArrived) {
           this.headerContent = 'NEXT_STOP';
         }
         break;
       case 'NEXT_STOP':
-        // this.headerContent = 'NEXT_STOP_KANA';
         if (this.isArrived) {
           this.headerContent = 'CURRENT_STATION';
+        } else {
+          this.headerContent = 'NEXT_STOP_KANA';
         }
         break;
       case 'NEXT_STOP_KANA':
@@ -496,20 +512,42 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public isJRLine(line: Line) {
-    const exceptedJRLines = ['上野東京ライン', '京都線', '大阪環状線']; // TODO: StationAPI側でなんとかする
+    const exceptedJRLines = [
+      '上野東京ライン',
+      '宇都宮線',
+      '京都線',
+      '大阪環状線'
+    ]; // TODO: StationAPI側でなんとかする
     return (
       line.name.startsWith('JR') || exceptedJRLines.indexOf(line.name) !== -1
     );
   }
 
   public headerStationNameStyle(stationName: string) {
-    if (stationName.length > 10) {
+    if (stationName.length > 8) {
       return {
-        fontSize: '5vw'
+        fontSize: '6vw'
       };
     }
     return {
       fontSize: '7.5vw'
     };
+  }
+
+  private katakanaToHiragana(src: string) {
+    return src.replace(/[\u30a1-\u30f6]/g, match => {
+      const chr = match.charCodeAt(0) - 0x60;
+      return String.fromCharCode(chr);
+    });
+  }
+
+  public get hiraganaCurrentStationName() {
+    const kana = this.formedStations[0].nameK;
+    return this.katakanaToHiragana(kana);
+  }
+
+  public get hiraganaNextStationName() {
+    const kana = this.formedStations[1].nameK;
+    return this.katakanaToHiragana(kana);
   }
 }

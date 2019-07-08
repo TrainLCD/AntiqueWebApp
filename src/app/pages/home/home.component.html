@@ -29,6 +29,20 @@
           <div
             class="headerBottom"
             [@content]
+            *ngIf="headerContent === 'CURRENT_STATION_KANA'"
+          >
+            <p class="headerUnit">ただいま</p>
+            <p
+              class="headerStationName"
+              [@content]
+              [ngStyle]="headerStationNameStyle(s.nameK)"
+            >
+              {{ hiraganaCurrentStationName }}
+            </p>
+          </div>
+          <div
+            class="headerBottom"
+            [@content]
             *ngIf="headerContent === 'NEXT_STOP' && formedStations[1]"
           >
             <p class="headerUnit">{{ nextText }}</p>
@@ -47,9 +61,9 @@
             <p class="headerUnit">{{ nextText }}</p>
             <p
               class="headerStationName"
-              　[ngStyle]="headerStationNameStyle(s.name)"
+              [ngStyle]="headerStationNameStyle(formedStations[1].nameK)"
             >
-              <!-- {{ hiraganaStationNames[formedStations[1].groupId] }} -->
+              {{ hiraganaNextStationName }}
             </p>
           </div>
         </header>

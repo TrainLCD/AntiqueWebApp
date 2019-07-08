@@ -17,6 +17,7 @@ export interface LineByIdData {
 export interface Station {
   groupId: number;
   name: string;
+  nameK: string;
   address: string;
   lines: Line[];
   latitude: number;
