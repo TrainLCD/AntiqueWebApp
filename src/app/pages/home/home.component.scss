@@ -165,7 +165,7 @@
   border: none;
   appearance: none;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
-  margin-top: 24px;
+  margin: 12px;
 }
 
 .badAccuracy {
@@ -207,6 +207,39 @@
     display: flex;
     padding: 0 5vw;
     flex-wrap: wrap;
-    justify-content: space-around;
+    justify-content: center;
   }
+}
+
+.refreshBtn {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background: #008ffe;
+  position: fixed;
+  right: 32px;
+  bottom: 32px;
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  color: #fff;
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.25);
+  transition: 0.25s;
+  .refreshIcon {
+    width: 50%;
+    height: auto;
+  }
+  &:active {
+    box-shadow: 0 0 3px rgba(0, 0, 0, 0.16);
+  }
+}
+
+.credit {
+  text-align: center;
+  margin: 24px 0;
+  font-weight: bold;
+}
+
+.credit a {
+  color: #008ffe;
 }

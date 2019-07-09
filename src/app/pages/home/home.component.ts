@@ -92,19 +92,18 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public getRefreshConditions(station: Station) {
-    return (
-      !this.selectedLineId ||
-        station.distance < ARRIVED_THRESHOLD);
+    return !!!this.selectedLineId || station.distance < ARRIVED_THRESHOLD;
   }
 
-  private fetchNearestStationFromAPI(latitude: number, longitude: number) {
+  private fetchNearestStationFromAPI(latitude: number, longitude: number, forceRefresh?: boolean) {
     const fetchStationSub = this.stationApiService
       .fetchNearestStation(latitude, longitude)
       .subscribe(station => {
         // 路線が選択されているときは違う駅の情報は無視する
         // ARRIVED_THRESHOLDより離れている場合無視する
         const conditions = this.getRefreshConditions(station);
-        if (!!conditions) {
+        const extraCondition = !this.station.getValue();
+        if (conditions && extraCondition || forceRefresh) {
           this.station.next(station);
         }
       });
@@ -112,19 +111,31 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private init() {
+    this.watchLocation();
+  }
+
+  public refreshStation() {
+    const { latitude, longitude } = this.currentCoordinates;
+    this.fetchNearestStationFromAPI(latitude, longitude, true);
+  }
+
+  private watchLocation() {
     const watchPositionSub = this.geolocationService
       .watchPosition()
       .subscribe(pos => {
-        this.currentCoordinates = pos.coords;
         const { latitude, longitude } = pos.coords;
-        if (!this.fetchedStations.getValue().length) {
+        this.currentCoordinates = pos.coords;
+        if (!this.boundStation) {
+          // 初回だけAPIから最寄り駅を取る
           this.fetchNearestStationFromAPI(latitude, longitude);
+          return;
         }
+        // 初回以降は自力で最寄り駅を探す
         const scoredStations = this.calcStationDistances(latitude, longitude);
         this.scoredStations = scoredStations;
         const nearestStation = scoredStations[0];
         const conditions = this.getRefreshConditions(nearestStation);
-        if (!!conditions) {
+        if (conditions) {
           this.station.next(nearestStation);
         }
       });
@@ -251,7 +262,9 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   public get headerStyle() {
     return {
-      borderBottom: `4px solid ${this.selectedLineColor ? this.selectedLineColor : '#9caeb7'}`
+      borderBottom: `4px solid ${
+        this.selectedLineColor ? this.selectedLineColor : '#9caeb7'
+      }`
     };
   }
 
@@ -267,13 +280,17 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   public get hasInboundStation(): boolean {
     const currentStation = this.station.getValue();
-    const stationIndex = this.fetchedStations.getValue().findIndex(s => s.groupId === currentStation.groupId);
+    const stationIndex = this.fetchedStations
+      .getValue()
+      .findIndex(s => s.groupId === currentStation.groupId);
     return stationIndex !== this.fetchedStations.getValue().length - 1;
   }
 
   public get hasOutboundStation(): boolean {
     const currentStation = this.station.getValue();
-    const stationIndex = this.fetchedStations.getValue().findIndex(s => s.groupId === currentStation.groupId);
+    const stationIndex = this.fetchedStations
+      .getValue()
+      .findIndex(s => s.groupId === currentStation.groupId);
     return !!stationIndex;
   }
 

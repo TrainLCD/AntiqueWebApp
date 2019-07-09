@@ -11,7 +11,6 @@ export class AppComponent implements OnInit {
 
   ngOnInit() {
     this.updates.available.subscribe(event => {
-      console.log(event);
       const prompt = window.confirm(
         'アップデートがあります。今すぐ更新しますか？'
       );

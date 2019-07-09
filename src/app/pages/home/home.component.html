@@ -106,6 +106,11 @@
       </div>
     </ng-container>
   </ng-container>
+  <footer class="credit" *ngIf="!boundStation">
+    <a href="https://tinykitten.me" target="_blank"
+      >このクソアプリを作った人(TinyKitten)</a
+    >
+  </footer>
 </div>
 
 <div class="badAccuracy" (click)="dismissBadAccuracy()" *ngIf="badAccuracy">
@@ -153,7 +158,10 @@
 </ng-template>
 
 <ng-template #boundNotSelected>
-  <div class="content selectBoundContent" *ngIf="fetchedStations | async; else loading">
+  <div
+    class="content selectBoundContent"
+    *ngIf="fetchedStations | async; else loading"
+  >
     <ng-container *ngIf="inboundStation && outboundStation; else loading">
       <header class="header" [ngStyle]="headerStyle">
         <div class="headerTop">
@@ -174,7 +182,7 @@
       </header>
       <h1 class="title">方面を選択してください</h1>
       <div class="buttons">
-          <button
+        <button
           class="normalButton"
           *ngIf="inboundStation && hasInboundStation"
           (click)="handleBoundClick('INBOUND', inboundStation)"
@@ -203,4 +211,8 @@
 
 <div class="orientationWarning">
   <p class="orientationWarningText">スマホを横向きにしてください</p>
+</div>
+
+<div class="refreshBtn" (click)="refreshStation()" *ngIf="!boundStation">
+  <img class="refreshIcon" src="/assets/refresh.svg" alt="refresh" />
 </div>
