@@ -94,10 +94,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   public getRefreshConditions(station: Station) {
     return (
       !this.selectedLineId ||
-      (station.lines.filter(l => parseInt(l.id, 10) === this.selectedLineId)
-        .length &&
-        station.distance < ARRIVED_THRESHOLD)
-    );
+        station.distance < ARRIVED_THRESHOLD);
   }
 
   private fetchNearestStationFromAPI(latitude: number, longitude: number) {
@@ -331,7 +328,6 @@ export class HomeComponent implements OnInit, OnDestroy {
           this.currentStationIndex + 1
         )
         .reverse();
-
       // 山手線と大阪環状線はちょっと処理が違う
       if (this.currentStationIndex < 7 && this.isOsakaLoopLine) {
         const nextStations = stations
@@ -344,7 +340,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         const nextStations = stations
           .slice()
           .reverse()
-          .slice(0, this.currentStationIndex - 1);
+          .slice(0, -(inboundPendingStations.length - 8));
         return [...inboundPendingStations, ...nextStations];
       }
       return inboundPendingStations;
