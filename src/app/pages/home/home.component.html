@@ -35,7 +35,7 @@
             <p
               class="headerStationName"
               [@content]
-              [ngStyle]="headerStationNameStyle(s.nameK)"
+              [ngStyle]="headerStationNameStyle(s.nameK, true)"
             >
               {{ hiraganaCurrentStationName }}
             </p>
@@ -61,7 +61,7 @@
             <p class="headerUnit">{{ nextText }}</p>
             <p
               class="headerStationName"
-              [ngStyle]="headerStationNameStyle(formedStations[1].nameK)"
+              [ngStyle]="headerStationNameStyle(formedStations[1].nameK, true)"
             >
               {{ hiraganaNextStationName }}
             </p>

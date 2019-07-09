@@ -523,10 +523,10 @@ export class HomeComponent implements OnInit, OnDestroy {
     );
   }
 
-  public headerStationNameStyle(stationName: string) {
+  public headerStationNameStyle(stationName: string, hiragana?: boolean) {
     if (stationName.length > 8) {
       return {
-        fontSize: '6vw'
+        fontSize: hiragana ? '4.5vw' : '5vw'
       };
     }
     return {
