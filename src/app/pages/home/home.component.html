@@ -120,46 +120,85 @@
 </ng-template>
 
 <ng-template #lineNotSelected>
-  <h1>路線を選択してください</h1>
-  <ng-container *ngFor="let line of station.getValue().lines">
-    <button
-      class="normalButton"
-      (click)="handleLineButtonClick(line.id)"
-      [ngStyle]="lineButtonStyle(line.lineColorC)"
-    >
-      {{ line.name }}
-    </button>
-  </ng-container>
+  <div class="content selectLineContent">
+    <header class="header" [ngStyle]="headerStyle">
+      <div class="headerTop">
+        <p class="headerBoundStationName">
+          TrainLCD
+        </p>
+      </div>
+      <div class="headerBottom" [@content]>
+        <p class="headerUnit">ただいま</p>
+        <p
+          class="headerStationName"
+          [@content]
+          [ngStyle]="headerStationNameStyle(station.getValue().name)"
+        >
+          {{ station.getValue().name }}
+        </p>
+      </div>
+    </header>
+    <h1 class="title">路線を選択してください</h1>
+    <div class="buttons">
+      <button
+        *ngFor="let line of station.getValue().lines"
+        class="normalButton"
+        (click)="handleLineButtonClick(line.id)"
+        [ngStyle]="lineButtonStyle(line.lineColorC)"
+      >
+        {{ line.name }}
+      </button>
+    </div>
+  </div>
 </ng-template>
 
 <ng-template #boundNotSelected>
-  <ng-container *ngIf="fetchedStations | async; else loading">
-    <h1>方面を選択してください</h1>
+  <div class="content selectBoundContent" *ngIf="fetchedStations | async; else loading">
     <ng-container *ngIf="inboundStation && outboundStation; else loading">
-      <button
-        class="normalButton"
-        *ngIf="inboundStation"
-        (click)="handleBoundClick('INBOUND', inboundStation)"
-      >
-        {{
-          isLoopLine
-            ? '内回り(' + inboundStationForLoopline.name + '方面)'
-            : inboundStation.name + '方面'
-        }}
-      </button>
-      <button
-        class="normalButton"
-        *ngIf="outboundStation"
-        (click)="handleBoundClick('OUTBOUND', outboundStation)"
-      >
-        {{
-          isLoopLine
-            ? '外回り(' + outboundStationForLoopline.name + '方面)'
-            : outboundStation.name + '方面'
-        }}
-      </button>
+      <header class="header" [ngStyle]="headerStyle">
+        <div class="headerTop">
+          <p class="headerBoundStationName">
+            TrainLCD
+          </p>
+        </div>
+        <div class="headerBottom" [@content]>
+          <p class="headerUnit">ただいま</p>
+          <p
+            class="headerStationName"
+            [@content]
+            [ngStyle]="headerStationNameStyle(station.getValue().name)"
+          >
+            {{ station.getValue().name }}
+          </p>
+        </div>
+      </header>
+      <h1 class="title">方面を選択してください</h1>
+      <div class="buttons">
+          <button
+          class="normalButton"
+          *ngIf="inboundStation && hasInboundStation"
+          (click)="handleBoundClick('INBOUND', inboundStation)"
+        >
+          {{
+            isLoopLine
+              ? '内回り(' + inboundStationForLoopline.name + '方面)'
+              : inboundStation.name + '方面'
+          }}
+        </button>
+        <button
+          class="normalButton"
+          *ngIf="outboundStation && hasOutboundStation"
+          (click)="handleBoundClick('OUTBOUND', outboundStation)"
+        >
+          {{
+            isLoopLine
+              ? '外回り(' + outboundStationForLoopline.name + '方面)'
+              : outboundStation.name + '方面'
+          }}
+        </button>
+      </div>
     </ng-container>
-  </ng-container>
+  </div>
 </ng-template>
 
 <div class="orientationWarning">

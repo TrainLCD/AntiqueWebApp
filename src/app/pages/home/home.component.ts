@@ -251,18 +251,30 @@ export class HomeComponent implements OnInit, OnDestroy {
 
   public get headerStyle() {
     return {
-      borderBottom: `4px solid ${this.selectedLineColor}`
+      borderBottom: `4px solid ${this.selectedLineColor ? this.selectedLineColor : '#9caeb7'}`
     };
   }
 
-  public get inboundStation() {
+  public get inboundStation(): Station {
     const stations = this.fetchedStations.getValue();
     return stations[stations.length - 1];
   }
 
-  public get outboundStation() {
+  public get outboundStation(): Station {
     const stations = this.fetchedStations.getValue();
     return stations[0];
+  }
+
+  public get hasInboundStation(): boolean {
+    const currentStation = this.station.getValue();
+    const stationIndex = this.fetchedStations.getValue().findIndex(s => s.groupId === currentStation.groupId);
+    return stationIndex !== this.fetchedStations.getValue().length - 1;
+  }
+
+  public get hasOutboundStation(): boolean {
+    const currentStation = this.station.getValue();
+    const stationIndex = this.fetchedStations.getValue().findIndex(s => s.groupId === currentStation.groupId);
+    return !!stationIndex;
   }
 
   // 環状運転している電車は中間地点を方面にする

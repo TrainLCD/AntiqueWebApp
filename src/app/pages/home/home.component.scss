@@ -157,7 +157,6 @@
 
 .normalButton {
   display: block;
-  margin: 21px auto;
   color: #fff;
   background: #333;
   border-radius: 4px;
@@ -166,6 +165,7 @@
   border: none;
   appearance: none;
   box-shadow: 0 3px 6px rgba(0, 0, 0, 0.16);
+  margin-top: 24px;
 }
 
 .badAccuracy {
@@ -193,4 +193,20 @@
   bottom: 12px;
   color: #aaa;
   font-size: 1vw;
+}
+
+.selectLineContent, .selectBoundContent {
+  .title {
+    text-align: center;
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #555;
+    margin-top: 24px;
+  }
+  .buttons {
+    display: flex;
+    padding: 0 5vw;
+    flex-wrap: wrap;
+    justify-content: space-around;
+  }
 }
