@@ -141,7 +141,6 @@ export class HomeComponent implements OnInit, OnDestroy {
         const nearestStation = scoredStations[0];
         const conditions = this.getRefreshConditions(nearestStation);
         if (conditions) {
-          this.headerContent = 'CURRENT_STATION';
           this.station.next(nearestStation);
         }
       });
@@ -456,7 +455,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private get isApproaching(): boolean {
-    const nextStation = this.scoredStations[1];
+    const nextStation = this.scoredStations[0];
     if (!nextStation) {
       return null;
     }
