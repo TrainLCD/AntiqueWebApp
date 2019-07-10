@@ -28,6 +28,7 @@ export class StationApiService {
             longitude
             lines {
               id
+              companyId
               lineColorC
               name
             }
@@ -58,6 +59,7 @@ export class StationApiService {
             longitude
             lines {
               id
+              companyId
               lineColorC
               name
             }
@@ -89,6 +91,7 @@ export class StationApiService {
             longitude
             lines {
               id
+              companyId
               lineColorC
               name
             }

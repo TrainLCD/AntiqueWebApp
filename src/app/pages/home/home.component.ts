@@ -16,6 +16,7 @@ const APPROACHING_THRESHOLD = 600; // m
 const ARRIVED_THRESHOLD = 100; // m
 const BAD_ACCURACY_THRESHOLD = 1000; // m
 const OMIT_JR_THRESHOLD = 3; // これ以上JR線があったら「JR線」で省略しよう
+const JR_LINE_MAX_ID = 6;
 
 type TrainDirection = 'INBOUND' | 'OUTBOUND';
 type HeaderContent =
@@ -95,7 +96,11 @@ export class HomeComponent implements OnInit, OnDestroy {
     return !!!this.selectedLineId || station.distance < ARRIVED_THRESHOLD;
   }
 
-  private fetchNearestStationFromAPI(latitude: number, longitude: number, forceRefresh?: boolean) {
+  private fetchNearestStationFromAPI(
+    latitude: number,
+    longitude: number,
+    forceRefresh?: boolean
+  ) {
     const fetchStationSub = this.stationApiService
       .fetchNearestStation(latitude, longitude)
       .subscribe(station => {
@@ -103,7 +108,7 @@ export class HomeComponent implements OnInit, OnDestroy {
         // ARRIVED_THRESHOLDより離れている場合無視する
         const conditions = this.getRefreshConditions(station);
         const extraCondition = !this.station.getValue();
-        if (conditions && extraCondition || forceRefresh) {
+        if ((conditions && extraCondition) || forceRefresh) {
           this.station.next(station);
         }
       });
@@ -511,17 +516,41 @@ export class HomeComponent implements OnInit, OnDestroy {
     return this.nextStationLinesWithoutCurrentLine;
   }
 
+  private jrCompanyColor(companyId: number): string {
+    switch (companyId) {
+      case 1: // 北海道
+        return '03c13d';
+      case 2: // 東日本
+        return '378640';
+      case 3: // 東海
+        return 'ff7e1c';
+      case 4: // 西日本
+        return '0072ba';
+      case 5: // 四国
+        return '00acd1';
+      case 5: // 九州
+        return 'f62e36';
+    }
+  }
+
   private omitJRLinesIfThresholdExceeded(stationIndex: number): Line[] {
-    const withoutCurrentLine = this.formedStations[stationIndex].lines.filter(
+    const currentStation = this.formedStations[stationIndex];
+    const withoutCurrentLine = currentStation.lines.filter(
       line => line.id !== this.currentLine.id
     );
     const jrLines = withoutCurrentLine.filter(line => this.isJRLine(line));
     if (jrLines.length >= OMIT_JR_THRESHOLD) {
       const withoutJR = withoutCurrentLine.filter(line => !this.isJRLine(line));
+      const isTokyoStation = currentStation.groupId === 1130101;
+      const lineColorC = isTokyoStation // 東京駅の１つ目の駅はJR東海（新幹線）なので
+        ? this.jrCompanyColor(jrLines[1].companyId)
+        : this.jrCompanyColor(jrLines[0].companyId);
+      const companyId = isTokyoStation ? jrLines[1].companyId : jrLines[0].companyId;
       withoutJR.unshift({
         id: '0',
-        lineColorC: '008000', // 関西の人間に喧嘩を売る配色
+        lineColorC,
         name: 'JR線',
+        companyId,
         __typename: 'Line'
       });
       return withoutJR;
@@ -538,15 +567,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public isJRLine(line: Line) {
-    const exceptedJRLines = [
-      '上野東京ライン',
-      '宇都宮線',
-      '京都線',
-      '大阪環状線'
-    ]; // TODO: StationAPI側でなんとかする
-    return (
-      line.name.startsWith('JR') || exceptedJRLines.indexOf(line.name) !== -1
-    );
+    return line.companyId <= JR_LINE_MAX_ID;
   }
 
   public headerStationNameStyle(stationName: string, hiragana?: boolean) {

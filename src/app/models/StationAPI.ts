@@ -28,6 +28,7 @@ export interface Station {
 
 export interface Line {
   id: string;
+  companyId: number;
   lineColorC: string | null;
   name: string;
   __typename: 'Line';
