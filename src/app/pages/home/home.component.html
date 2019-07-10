@@ -1,117 +1,137 @@
-<div class="container">
-  <ng-container *ngIf="station | async as s; else loading">
-    <ng-container *ngIf="selectedLineId; else lineNotSelected">
-      <div class="content" *ngIf="boundStation; else boundNotSelected">
-        <header class="header" [ngStyle]="headerStyle">
-          <div class="headerTop">
-            <p class="headerBoundStationName">
-              {{
-                isLoopLine
-                  ? currentLine.name + ' ' + ringBoundDirection
-                  : boundStation.name + ' 方面'
-              }}
-            </p>
-          </div>
-          <div
-            class="headerBottom"
+<header
+  *ngIf="!boundStation && station.getValue()"
+  class="header"
+  [ngStyle]="headerStyle"
+>
+  <div class="headerTop">
+    <p class="headerBoundStationName">
+      TrainLCD
+    </p>
+  </div>
+  <div class="headerBottom" [@content]>
+    <p class="headerUnit">ただいま</p>
+    <p
+      class="headerStationName"
+      [@content]
+      [ngStyle]="headerStationNameStyle(station.getValue().name)"
+    >
+      {{ station.getValue().name }}
+    </p>
+  </div>
+</header>
+
+<ng-container *ngIf="station | async as s; else loading">
+  <ng-container *ngIf="selectedLineId; else lineNotSelected">
+    <div class="content" *ngIf="boundStation; else boundNotSelected">
+      <header class="header" [ngStyle]="headerStyle">
+        <div class="headerTop">
+          <p class="headerBoundStationName">
+            {{
+              isLoopLine
+                ? currentLine.name + ' ' + ringBoundDirection
+                : boundStation.name + ' 方面'
+            }}
+          </p>
+        </div>
+        <div
+          class="headerBottom"
+          [@content]
+          *ngIf="headerContent === 'CURRENT_STATION'"
+        >
+          <p class="headerUnit">ただいま</p>
+          <p
+            class="headerStationName"
             [@content]
-            *ngIf="headerContent === 'CURRENT_STATION'"
+            [ngStyle]="headerStationNameStyle(s.name)"
           >
-            <p class="headerUnit">ただいま</p>
-            <p
-              class="headerStationName"
-              [@content]
-              [ngStyle]="headerStationNameStyle(s.name)"
-            >
+            {{ s.name }}
+          </p>
+        </div>
+        <div
+          class="headerBottom"
+          [@content]
+          *ngIf="headerContent === 'CURRENT_STATION_KANA'"
+        >
+          <p class="headerUnit">ただいま</p>
+          <p
+            class="headerStationName"
+            [@content]
+            [ngStyle]="headerStationNameStyle(s.nameK, true)"
+          >
+            {{ hiraganaCurrentStationName }}
+          </p>
+        </div>
+        <div
+          class="headerBottom"
+          [@content]
+          *ngIf="headerContent === 'NEXT_STOP' && formedStations[1]"
+        >
+          <p class="headerUnit">{{ nextText }}</p>
+          <p
+            class="headerStationName"
+            [ngStyle]="headerStationNameStyle(formedStations[1].name)"
+          >
+            {{ formedStations[1].name }}
+          </p>
+        </div>
+        <div
+          class="headerBottom"
+          [@content]
+          *ngIf="headerContent === 'NEXT_STOP_KANA' && formedStations[1]"
+        >
+          <p class="headerUnit">{{ nextText }}</p>
+          <p
+            class="headerStationName"
+            [ngStyle]="headerStationNameStyle(formedStations[1].nameK, true)"
+          >
+            {{ hiraganaNextStationName }}
+          </p>
+        </div>
+      </header>
+      <main class="bottom">
+        <ul
+          class="stations"
+          *ngIf="formedStations.length && bottomContent === 'LINE'"
+        >
+          <li class="stationWrapper" *ngFor="let s of formedStations">
+            <p class="stationsStationName">
               {{ s.name }}
             </p>
-          </div>
-          <div
-            class="headerBottom"
-            [@content]
-            *ngIf="headerContent === 'CURRENT_STATION_KANA'"
-          >
-            <p class="headerUnit">ただいま</p>
-            <p
-              class="headerStationName"
-              [@content]
-              [ngStyle]="headerStationNameStyle(s.nameK, true)"
-            >
-              {{ hiraganaCurrentStationName }}
-            </p>
-          </div>
-          <div
-            class="headerBottom"
-            [@content]
-            *ngIf="headerContent === 'NEXT_STOP' && formedStations[1]"
-          >
-            <p class="headerUnit">{{ nextText }}</p>
-            <p
-              class="headerStationName"
-              [ngStyle]="headerStationNameStyle(formedStations[1].name)"
-            >
-              {{ formedStations[1].name }}
-            </p>
-          </div>
-          <div
-            class="headerBottom"
-            [@content]
-            *ngIf="headerContent === 'NEXT_STOP_KANA' && formedStations[1]"
-          >
-            <p class="headerUnit">{{ nextText }}</p>
-            <p
-              class="headerStationName"
-              [ngStyle]="headerStationNameStyle(formedStations[1].nameK, true)"
-            >
-              {{ hiraganaNextStationName }}
-            </p>
-          </div>
-        </header>
-        <main class="bottom">
-          <ul
-            class="stations"
-            *ngIf="formedStations.length && bottomContent === 'LINE'"
-          >
-            <li class="stationWrapper" *ngFor="let s of formedStations">
-              <p class="stationsStationName">
-                {{ s.name }}
-              </p>
-              <div
-                [class]="
-                  s.groupId !== station.getValue().groupId
-                    ? 'lineDot'
-                    : 'lineDot lineDotCurrent'
-                "
-              ></div>
-            </li>
-          </ul>
+            <div
+              [class]="
+                s.groupId !== station.getValue().groupId
+                  ? 'lineDot'
+                  : 'lineDot lineDotCurrent'
+              "
+            ></div>
+          </li>
+        </ul>
 
-          <div class="transfer" *ngIf="bottomContent === 'TRANSFER'">
-            <h2 class="transferTitle">のりかえ</h2>
-            <div class="transferList">
-              <div *ngFor="let line of transferLines" class="transferItem">
-                <div
-                  class="transferLineDot"
-                  [ngStyle]="transferLineDotStyle(line.id)"
-                ></div>
-                <p class="transferLineName">{{ line.name }}</p>
-              </div>
+        <div class="transfer" *ngIf="bottomContent === 'TRANSFER'">
+          <h2 class="transferTitle">のりかえ</h2>
+          <div class="transferList">
+            <div *ngFor="let line of transferLines" class="transferItem">
+              <div
+                class="transferLineDot"
+                [ngStyle]="transferLineDotStyle(line.id)"
+              ></div>
+              <p class="transferLineName">{{ line.name }}</p>
             </div>
           </div>
-          <p class="caution">
-            スマートフォンでの表示を前提としています。<br />
-            地下鉄など、電波の入りづらい場所では正常に動作しない可能性があります。
-          </p>
-        </main>
-      </div>
-    </ng-container>
+        </div>
+        <p class="caution">
+          スマートフォンでの表示を前提としています。<br />
+          地下鉄など、電波の入りづらい場所では正常に動作しない可能性があります。
+        </p>
+      </main>
+    </div>
   </ng-container>
-  <footer class="credit" *ngIf="!boundStation">
-    <a href="https://tinykitten.me" target="_blank"
-      >このクソアプリを作った人(TinyKitten)</a
-    >
-  </footer>
-</div>
+</ng-container>
+<footer class="credit" *ngIf="!boundStation">
+  <a href="https://tinykitten.me" target="_blank"
+    >このクソアプリを作った人(TinyKitten)</a
+  >
+</footer>
 
 <div class="badAccuracy" (click)="dismissBadAccuracy()" *ngIf="badAccuracy">
   <b>GPSの誤差が1km以上あるため、正常に動作しない可能性があります。</b>
@@ -126,23 +146,6 @@
 
 <ng-template #lineNotSelected>
   <div class="content selectLineContent">
-    <header class="header" [ngStyle]="headerStyle">
-      <div class="headerTop">
-        <p class="headerBoundStationName">
-          TrainLCD
-        </p>
-      </div>
-      <div class="headerBottom" [@content]>
-        <p class="headerUnit">ただいま</p>
-        <p
-          class="headerStationName"
-          [@content]
-          [ngStyle]="headerStationNameStyle(station.getValue().name)"
-        >
-          {{ station.getValue().name }}
-        </p>
-      </div>
-    </header>
     <h1 class="title">路線を選択してください</h1>
     <div class="buttons">
       <button
@@ -163,23 +166,6 @@
     *ngIf="fetchedStations | async; else loading"
   >
     <ng-container *ngIf="inboundStation && outboundStation; else loading">
-      <header class="header" [ngStyle]="headerStyle">
-        <div class="headerTop">
-          <p class="headerBoundStationName">
-            TrainLCD
-          </p>
-        </div>
-        <div class="headerBottom" [@content]>
-          <p class="headerUnit">ただいま</p>
-          <p
-            class="headerStationName"
-            [@content]
-            [ngStyle]="headerStationNameStyle(station.getValue().name)"
-          >
-            {{ station.getValue().name }}
-          </p>
-        </div>
-      </header>
       <h1 class="title">方面を選択してください</h1>
       <div class="buttons">
         <button
