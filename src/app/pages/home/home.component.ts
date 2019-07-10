@@ -12,7 +12,7 @@ import { StationApiService } from '../../services/station-api/station-api.servic
 const HEADER_CONTENT_TRANSITION_INTERVAL = 3000; // ms
 const BOTTOM_CONTENT_TRANSITION_INTERVAL =
   HEADER_CONTENT_TRANSITION_INTERVAL * 2; // ms
-const APPROACHING_THRESHOLD = 400; // m
+const APPROACHING_THRESHOLD = 600; // m
 const ARRIVED_THRESHOLD = 100; // m
 const BAD_ACCURACY_THRESHOLD = 1000; // m
 const OMIT_JR_THRESHOLD = 3; // これ以上JR線があったら「JR線」で省略しよう
@@ -460,7 +460,6 @@ export class HomeComponent implements OnInit, OnDestroy {
       return;
     }
     const currentStation = this.scoredStations[0];
-    console.log(currentStation.groupId === nextStation.groupId);
     // APPROACHING_THRESHOLD以上次の駅から離れている: つぎは
     // APPROACHING_THRESHOLDより近い: まもなく
     return (
