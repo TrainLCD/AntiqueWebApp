@@ -285,6 +285,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public get hasInboundStation(): boolean {
+    if (this.isLoopLine) {
+      return true;
+    }
     const currentStation = this.station.getValue();
     const stationIndex = this.fetchedStations
       .getValue()
@@ -293,6 +296,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public get hasOutboundStation(): boolean {
+    if (this.isLoopLine) {
+      return true;
+    }
     const currentStation = this.station.getValue();
     const stationIndex = this.fetchedStations
       .getValue()
