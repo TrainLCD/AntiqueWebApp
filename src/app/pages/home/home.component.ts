@@ -455,10 +455,18 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   private get isApproaching(): boolean {
-    const nextStation = this.scoredStations[0];
+    const nextStation = this.formedStations[1];
+    if (!nextStation) {
+      return;
+    }
+    const currentStation = this.scoredStations[0];
+    console.log(currentStation.groupId === nextStation.groupId);
     // APPROACHING_THRESHOLD以上次の駅から離れている: つぎは
     // APPROACHING_THRESHOLDより近い: まもなく
-    return nextStation.distance < APPROACHING_THRESHOLD;
+    return (
+      currentStation.distance < APPROACHING_THRESHOLD &&
+      currentStation.groupId === nextStation.groupId
+    );
   }
 
   private get isArrived(): boolean {
@@ -547,7 +555,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       const lineColorC = isTokyoStation // 東京駅の１つ目の駅はJR東海（新幹線）なので
         ? this.jrCompanyColor(jrLines[1].companyId)
         : this.jrCompanyColor(jrLines[0].companyId);
-      const companyId = isTokyoStation ? jrLines[1].companyId : jrLines[0].companyId;
+      const companyId = isTokyoStation
+        ? jrLines[1].companyId
+        : jrLines[0].companyId;
       withoutJR.unshift({
         id: '0',
         lineColorC,
