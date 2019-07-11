@@ -6,7 +6,7 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class GeolocationService {
-  private watchId: number;
+  private watchId: number | null = null;
 
   constructor() {}
 
@@ -21,6 +21,9 @@ export class GeolocationService {
   }
 
   public clearWatch() {
+    if (!this.watchId) {
+      return;
+    }
     navigator.geolocation.clearWatch(this.watchId);
   }
 }

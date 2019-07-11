@@ -4,17 +4,21 @@ import { Injectable } from '@angular/core';
   providedIn: 'root'
 })
 export class DistanceService {
+  constructor() {}
 
-  constructor() { }
-
-  calcHubenyDistance(from: Partial<Coordinates>, to: Partial<Coordinates>) {
+  public calcHubenyDistance(from: Partial<Coordinates>, to: Partial<Coordinates>): number {
+    const { latitude: fromLatitude, longitude: fromLongitude } = from;
+    const { latitude: toLatitude, longitude: toLongitude } = to;
+    if (!fromLatitude || !fromLongitude || !toLatitude || !toLongitude) {
+      return 0;
+    }
     const rad = (deg: number) => {
-      return deg * Math.PI / 180;
+      return (deg * Math.PI) / 180;
     };
-    const radFromLat = rad(from.latitude);
-    const radFromLon = rad(from.longitude);
-    const radToLat = rad(to.latitude);
-    const radToLon = rad(to.longitude);
+    const radFromLat = rad(fromLatitude);
+    const radFromLon = rad(fromLongitude);
+    const radToLat = rad(toLatitude);
+    const radToLon = rad(toLongitude);
 
     const latDiff = radFromLat - radToLat;
     const lngDiff = radFromLon - radToLon;
@@ -31,6 +35,6 @@ export class DistanceService {
 
     const t1 = M * latDiff;
     const t2 = N * Math.cos(latAvg) * lngDiff;
-    return Math.sqrt((t1 * t1) + (t2 * t2));
+    return Math.sqrt(t1 * t1 + t2 * t2);
   }
 }
