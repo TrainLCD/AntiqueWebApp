@@ -44,13 +44,13 @@ type BottomContent = 'LINE' | 'TRANSFER';
   ]
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  private currentCoordinates?: Coordinates;
+  private currentCoordinates: Coordinates | null = null;
   private subscriptions: Subscription[] = [];
   public station = new BehaviorSubject<Station | null>(null);
-  public selectedLineId?: number;
+  public selectedLineId: number | null = null;
   public fetchedStations = new BehaviorSubject<Station[]>([]);
-  public boundStation?: Station;
-  private boundDirection?: TrainDirection;
+  public boundStation: Station | null = null;
+  private boundDirection: TrainDirection | null = null;
   public headerContent: HeaderContent = 'CURRENT_STATION';
   public bottomContent: BottomContent = 'LINE';
   private badAccuracyDismissed = false;
@@ -277,6 +277,10 @@ export class HomeComponent implements OnInit, OnDestroy {
         this.selectedLineColor ? this.selectedLineColor : '#9caeb7'
       }`
     };
+  }
+
+  public clearSelectedLine() {
+    this.selectedLineId = null;
   }
 
   public get inboundStation(): Station {

@@ -173,30 +173,38 @@
     <ng-container *ngIf="inboundStation && outboundStation; else loading">
       <h1 class="title">方面を選択してください</h1>
       <div class="buttons">
-        <button
-          class="normalButton"
-          *ngIf="inboundStation && hasInboundStation"
-          (click)="handleBoundClick('INBOUND', inboundStation)"
-        >
-          {{
-            isLoopLine
-              ? '内回り(' + inboundStationForLoopline.name + '方面)'
-              : inboundStation.name + '方面'
-          }}
-        </button>
-        <button
-          class="normalButton"
-          *ngIf="outboundStation && hasOutboundStation"
-          (click)="handleBoundClick('OUTBOUND', outboundStation)"
-        >
-          {{
-            isLoopLine
-              ? '外回り(' + outboundStationForLoopline.name + '方面)'
-              : outboundStation.name + '方面'
-          }}
-        </button>
-      </div>
-    </ng-container>
+          <button
+            class="normalButton"
+            *ngIf="inboundStation && hasInboundStation"
+            (click)="handleBoundClick('INBOUND', inboundStation)"
+          >
+            {{
+              isLoopLine
+                ? '内回り(' + inboundStationForLoopline.name + '方面)'
+                : inboundStation.name + '方面'
+            }}
+          </button>
+          <button
+            class="normalButton"
+            *ngIf="outboundStation && hasOutboundStation"
+            (click)="handleBoundClick('OUTBOUND', outboundStation)"
+          >
+            {{
+              isLoopLine
+                ? '外回り(' + outboundStationForLoopline.name + '方面)'
+                : outboundStation.name + '方面'
+            }}
+          </button>
+        </div>
+        <div class="buttons">
+            <button
+              class="normalButton"
+              (click)="clearSelectedLine()"
+            >
+          戻る
+          </button>
+          </div>
+          </ng-container>
   </div>
 </ng-template>
 
