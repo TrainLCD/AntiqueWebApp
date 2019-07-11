@@ -1,5 +1,5 @@
 <header
-  *ngIf="!boundStation && station.getValue()"
+  *ngIf="!boundStation && station.getValue() as s"
   class="header"
   [ngStyle]="headerStyle"
 >
@@ -13,9 +13,9 @@
     <p
       class="headerStationName"
       [@content]
-      [ngStyle]="headerStationNameStyle(station.getValue().name)"
+      [ngStyle]="headerStationNameStyle(s.name)"
     >
-      {{ station.getValue().name }}
+      {{ s.name }}
     </p>
   </div>
 </header>
@@ -25,13 +25,17 @@
     <div class="content" *ngIf="boundStation; else boundNotSelected">
       <header class="header" [ngStyle]="headerStyle">
         <div class="headerTop">
-          <p class="headerBoundStationName">
-            {{
-              isLoopLine
-                ? currentLine.name + ' ' + ringBoundDirection
-                : boundStation.name + ' 方面'
-            }}
-          </p>
+          <ng-container *ngIf="currentLine as cl">
+            <ng-container *ngIf="boundStation as bs">
+              <p class="headerBoundStationName">
+                {{
+                  isLoopLine
+                    ? cl.name + ' ' + ringBoundDirection
+                    : bs.name + ' 方面'
+                }}
+              </p>
+            </ng-container>
+          </ng-container>
         </div>
         <div
           class="headerBottom"
@@ -93,17 +97,18 @@
           class="stations"
           *ngIf="formedStations.length && bottomContent === 'LINE'"
         >
-          <li class="stationWrapper" *ngFor="let s of formedStations">
+          <li class="stationWrapper" *ngFor="let fs of formedStations">
             <p class="stationsStationName">
-              {{ s.name }}
+              {{ fs.name }}
             </p>
-            <div
-              [class]="
-                s.groupId !== station.getValue().groupId
-                  ? 'lineDot'
-                  : 'lineDot lineDotCurrent'
-              "
-            ></div>
+            <div class="lineDot" *ngIf="boundStation as bs">
+                <img
+                *ngIf="s.groupId === fs.groupId"
+                [ngClass]="!isArrived ? 'chevron' : 'chevron chevronArrived'"
+                src="/assets/chevron.svg"
+                alt="current"
+              />
+            </div>
           </li>
         </ul>
 
@@ -145,11 +150,11 @@
 </ng-template>
 
 <ng-template #lineNotSelected>
-  <div class="content selectLineContent">
+  <div class="content selectLineContent" *ngIf="station.getValue() as s">
     <h1 class="title">路線を選択してください</h1>
     <div class="buttons">
       <button
-        *ngFor="let line of station.getValue().lines"
+        *ngFor="let line of s.lines"
         class="normalButton"
         (click)="handleLineButtonClick(line.id)"
         [ngStyle]="lineButtonStyle(line.lineColorC)"

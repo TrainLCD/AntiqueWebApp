@@ -44,13 +44,13 @@ type BottomContent = 'LINE' | 'TRANSFER';
   ]
 })
 export class HomeComponent implements OnInit, OnDestroy {
-  private currentCoordinates: Coordinates;
+  private currentCoordinates?: Coordinates;
   private subscriptions: Subscription[] = [];
-  public station = new BehaviorSubject<Station>(null);
-  public selectedLineId: number;
+  public station = new BehaviorSubject<Station | null>(null);
+  public selectedLineId?: number;
   public fetchedStations = new BehaviorSubject<Station[]>([]);
-  public boundStation: Station;
-  private boundDirection: TrainDirection;
+  public boundStation?: Station;
+  private boundDirection?: TrainDirection;
   public headerContent: HeaderContent = 'CURRENT_STATION';
   public bottomContent: BottomContent = 'LINE';
   private badAccuracyDismissed = false;
@@ -120,6 +120,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   }
 
   public refreshStation() {
+    if (!this.currentCoordinates) {
+      return;
+    }
     const { latitude, longitude } = this.currentCoordinates;
     this.fetchNearestStationFromAPI(latitude, longitude, true);
   }
@@ -165,6 +168,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       .fetchStationsByLineId(intLineId)
       .subscribe(stations => {
         this.fetchedStations.next(stations);
+        if (!this.currentCoordinates) {
+          return;
+        }
         const { latitude, longitude } = this.currentCoordinates;
         const scoredStations = this.calcStationDistances(latitude, longitude);
         this.scoredStations = scoredStations;
@@ -288,6 +294,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       return true;
     }
     const currentStation = this.station.getValue();
+    if (!currentStation) {
+      return false;
+    }
     const stationIndex = this.fetchedStations
       .getValue()
       .findIndex(s => s.groupId === currentStation.groupId);
@@ -299,6 +308,9 @@ export class HomeComponent implements OnInit, OnDestroy {
       return true;
     }
     const currentStation = this.station.getValue();
+    if (!currentStation) {
+      return false;
+    }
     const stationIndex = this.fetchedStations
       .getValue()
       .findIndex(s => s.groupId === currentStation.groupId);
@@ -408,9 +420,12 @@ export class HomeComponent implements OnInit, OnDestroy {
     );
   }
 
-  public get currentStationIndex() {
+  public get currentStationIndex(): number {
     const stations = this.fetchedStations.getValue();
     const currentStation = this.station.getValue();
+    if (!currentStation) {
+      return 0;
+    }
     return stations.findIndex(s => s.groupId === currentStation.groupId);
   }
 
@@ -440,9 +455,13 @@ export class HomeComponent implements OnInit, OnDestroy {
     );
   }
 
-  public get currentLine() {
-    return this.station
-      .getValue()
+  public get currentLine(): Line | null {
+    const station =  this.station
+    .getValue();
+    if (!station) {
+      return null;
+    }
+    return station
       .lines.filter(l => parseInt(l.id, 10) === this.selectedLineId)[0];
   }
 
@@ -457,7 +476,7 @@ export class HomeComponent implements OnInit, OnDestroy {
   private get isApproaching(): boolean {
     const nextStation = this.formedStations[1];
     if (!nextStation) {
-      return;
+      return false;
     }
     const currentStation = this.scoredStations[0];
     // APPROACHING_THRESHOLD以上次の駅から離れている: つぎは
@@ -539,13 +558,19 @@ export class HomeComponent implements OnInit, OnDestroy {
         return '00acd1';
       case 5: // 九州
         return 'f62e36';
+      default:
+          return '';
     }
   }
 
   private omitJRLinesIfThresholdExceeded(stationIndex: number): Line[] {
     const currentStation = this.formedStations[stationIndex];
+    const currentLine = this.currentLine;
+    if (!currentLine) {
+      return [];
+    }
     const withoutCurrentLine = currentStation.lines.filter(
-      line => line.id !== this.currentLine.id
+      line => line.id !== currentLine.id
     );
     const jrLines = withoutCurrentLine.filter(line => this.isJRLine(line));
     if (jrLines.length >= OMIT_JR_THRESHOLD) {
@@ -607,5 +632,9 @@ export class HomeComponent implements OnInit, OnDestroy {
   public get hiraganaNextStationName() {
     const kana = this.formedStations[1].nameK;
     return this.katakanaToHiragana(kana);
+  }
+
+  public get(): string {
+    return 'lineDot';
   }
 }
