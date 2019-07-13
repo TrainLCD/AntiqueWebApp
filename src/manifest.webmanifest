@@ -1,8 +1,8 @@
 {
   "name": "TrainLCD",
   "short_name": "TrainLCD",
-  "theme_color": "#008ffe",
-  "background_color": "#fafafa",
+  "theme_color": "#ebedee",
+  "background_color": "#fff",
   "display": "standalone",
   "orientation": "landscape",
   "scope": "/",
