@@ -15,7 +15,7 @@ export class GeolocationService {
       this.watchId = navigator.geolocation.watchPosition(
         position => observer.next(position),
         err => observer.error(err),
-        { enableHighAccuracy: false, timeout, maximumAge: 0 }
+        { enableHighAccuracy: true, timeout }
       );
     });
   }
