@@ -327,7 +327,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const maybeIndex = this.currentStationIndex - 4;
     const fallbackIndex = stations.length - 1 - 7;
     const index =
-      maybeIndex < 0 || maybeIndex > stations.length
+      maybeIndex < 0 || maybeIndex > stations.length - 1
         ? fallbackIndex
         : maybeIndex;
     return stations[index];
@@ -338,7 +338,7 @@ export class HomeComponent implements OnInit, OnDestroy {
     const maybeIndex = this.currentStationIndex + 4;
     const fallbackIndex = Math.floor((stations.length - 1) / 4);
     const index =
-      maybeIndex < 0 || maybeIndex > stations.length
+      maybeIndex < 0 || maybeIndex > stations.length - 1
         ? fallbackIndex
         : maybeIndex;
     return stations[index];
